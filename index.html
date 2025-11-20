@@ -3,8 +3,11 @@
    <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Company Information Database</title>
+      <title>Wienerberger Information Hub</title>
       <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='SlateBlue'/><text y='.9em' font-size='95' font-weight='bold' fill='black'>W</text></svg>">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
       <style>
          * {
          margin: 0;
@@ -542,13 +545,614 @@
          font-weight: 450;
          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
          }
+         
+         /* SAP Compliance Dashboard Styles */
+         .sap-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+         }
+         
+         .sap-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 15s ease-in-out infinite;
+         }
+         
+         @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+         }
+
+         .sap-header h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+            letter-spacing: 1px;
+         }
+
+         .sap-header p {
+            color: rgba(255,255,255,0.95);
+            font-size: 1.1em;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+         }
+
+         /* COMPACT FILE UPLOAD SECTION WITH HOVER EFFECTS */
+         .file-upload {
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #667eea;
+            text-align: center;
+            transition: all 0.3s ease;
+         }
+
+         .file-upload:hover {
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+            border-color: #5a6fd8;
+            transform: translateY(-2px);
+         }
+
+         .file-upload h3 {
+            margin-bottom: 8px;
+            color: #667eea;
+            font-size: 1em;
+            font-weight: 700;
+            transition: color 0.3s ease;
+         }
+
+         .file-upload:hover h3 {
+            color: #5a6fd8;
+         }
+
+         .upload-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 5px;
+         }
+
+         .upload-box {
+            flex: 1;
+            min-width: 200px;
+            max-width: 280px;
+            background: #f8f9ff;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px dashed #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+         }
+
+         .upload-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s ease;
+         }
+
+         .upload-box:hover {
+            background: #f0f4ff;
+            border-color: #5a6fd8;
+            border-style: solid;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.15);
+         }
+
+         .upload-box:hover::before {
+            left: 100%;
+         }
+
+         .upload-icon {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+         }
+
+         .upload-box:hover .upload-icon {
+            color: #5a6fd8;
+            transform: scale(1.1);
+         }
+
+         .upload-title {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 4px;
+            font-size: 0.9em;
+            transition: color 0.3s ease;
+         }
+
+         .upload-box:hover .upload-title {
+            color: #5a6fd8;
+         }
+
+         .file-input-wrapper {
+            position: relative;
+            width: 100%;
+            margin: 2px 0;
+         }
+
+         .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+         }
+
+         .file-input-label {
+            display: block;
+            background: #f0f4ff;
+            color: #667eea;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #d1dcff;
+            text-align: center;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+         }
+
+         .file-input-label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+         }
+
+         .file-input-label:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
+         }
+
+         .file-input-label:hover::before {
+            left: 100%;
+         }
+
+         .file-name {
+            margin-top: 2px;
+            font-size: 0.65em;
+            color: #666;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            height: 12px;
+            transition: color 0.3s ease;
+         }
+
+         .upload-box:hover .file-name {
+            color: #5a6fd8;
+         }
+
+         .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(102, 126, 234, 0.4);
+            width: 100%;
+            margin-top: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+         }
+
+         .upload-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+         }
+
+         .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.5);
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+         }
+
+         .upload-btn:hover::before {
+            left: 100%;
+         }
+
+         .upload-btn:active {
+            transform: translateY(0);
+         }
+
+         .file-upload small {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.75em;
+            transition: color 0.3s ease;
+         }
+
+         .file-upload:hover small {
+            color: #5a6fd8;
+         }
+         /* END OF COMPACT FILE UPLOAD SECTION */
+
+         .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+         }
+
+         .nav-tabs button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            color: #333;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+         }
+
+         .nav-tabs button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+         }
+
+         .nav-tabs button.active {
+            background: #667eea;
+            color: white;
+         }
+
+         .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+         }
+
+         .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-left: 5px solid;
+            transition: transform 0.3s;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+         }
+
+         .kpi-card:hover {
+            transform: translateY(-5px);
+         }
+         
+         .kpi-card:hover::before {
+            opacity: 1;
+         }
+         
+         .kpi-card.blue { 
+            border-left-color: #3b82f6; 
+            background: linear-gradient(135deg, #f0f7ff 0%, #e1effe 100%);
+         }
+         .kpi-card.green { 
+            border-left-color: #10b981; 
+            background: linear-gradient(135deg, #f0fdf9 0%, #e1fbf3 100%);
+         }
+         .kpi-card.red { 
+            border-left-color: #ef4444; 
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+         }
+         .kpi-card.purple { 
+            border-left-color: #8b5cf6; 
+            background: linear-gradient(135deg, #f8f7ff 0%, #f0edff 100%);
+         }
+         .kpi-card.orange { 
+            border-left-color: #f59e0b; 
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+         }
+         .kpi-card.teal { 
+            border-left-color: #14b8a6; 
+            background: linear-gradient(135deg, #f0fdfa 0%, #e1fbf6 100%);
+         }
+
+         .kpi-card.blue { border-left-color: #3b82f6; }
+         .kpi-card.green { border-left-color: #10b981; }
+         .kpi-card.red { border-left-color: #ef4444; }
+         .kpi-card.purple { border-left-color: #8b5cf6; }
+         .kpi-card.orange { border-left-color: #f59e0b; }
+         .kpi-card.teal { border-left-color: #14b8a6; }
+
+         .kpi-title {
+            color: #666;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            line-height: 1.2;
+         }
+
+         .kpi-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 4px;
+            line-height: 1.1;
+         }
+
+         .kpi-card.blue .kpi-value { color: #3b82f6; }
+         .kpi-card.green .kpi-value { color: #10b981; }
+         .kpi-card.red .kpi-value { color: #ef4444; }
+         .kpi-card.purple .kpi-value { color: #8b5cf6; }
+         .kpi-card.orange .kpi-value { color: #f59e0b; }
+         .kpi-card.teal .kpi-value { color: #14b8a6; }
+
+         .kpi-subtitle {
+            color: #999;
+            font-size: 0.8em;
+            line-height: 1.2;
+         }
+
+         .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+         }
+
+         /* AD Chart - Full Height */
+         .status-chart-container {
+            max-width: 680px;
+            min-width: 680px;
+            margin: 0 auto;
+            padding: 30px 40px;
+            height: auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+         }
+
+         #statusChart {
+            min-height: 420px;
+            height: 420px;
+         }
+
+         /* SAP Chart - Fixed Height */
+         .sap-chart-container {
+            height: 450px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+         }
+
+         #sapUserChart {
+            height: 350px;
+            min-height: 350px;
+            max-height: 350px;
+         }
+
+         .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+         }
+         
+         .chart-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+         }
+
+         .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+         }
+
+         .chart-container:has(#userTypeSummary) {
+            padding: 15px;
+         }
+
+         #userTypeSummary {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+         }
+
+         .data-item {
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 10px;
+            border-left: 3px solid #667eea;
+            min-height: 50px;
+         }
+
+         .data-item-label {
+            color: #666;
+            font-size: 0.7em;
+            margin-bottom: 2px;
+            font-weight: 600;
+         }
+
+         .data-item-value {
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: bold;
+         }
+
+         .chart-container:has(#userTypeSummary) .chart-title {
+            margin-bottom: 12px;
+         }
+
+         .section {
+            display: none;
+         }
+
+         .section.active {
+            display: block;
+         }
+
+         .loading {
+            text-align: center;
+            padding: 20px;
+            color: #edcb7b;
+         }
+
+         .detail-section {
+            margin-top: 20px;
+         }
+
+         .detail-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+         }
+
+         .detail-header {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+         }
+
+         .detail-value {
+            color: #666;
+         }
+
+         .expired-user {
+            background: #fee2e2;
+            border-left-color: #ef4444;
+         }
+
+         /* SAP Compliance Full Page Styles */
+         .sap-full-page {
+            display: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+         }
+
+         .sap-full-page.active {
+            display: block;
+         }
+
+         .sap-full-container {
+            max-width: 1400px;
+            margin: 0 auto;
+         }
+
+         .back-to-hub {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+         }
+
+         .back-to-hub:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+         }
+		 
+		 button[onclick="checkPin()"]:hover {
+    background: #5a6fd8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+#pinInput:focus {
+    border-color: #f0b835 !important;
+    box-shadow: 0 0 0 3px rgba(237, 202, 119, 0.2) !important;
+}
+         @media (max-width: 768px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .sap-header h1 {
+                font-size: 1.8em;
+            }
+            
+            .upload-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .upload-box {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            /* Mobile adjustment for SAP chart */
+            .chart-container:has(#sapUserChart) {
+                height: 200px;
+            }
+
+            #sapUserChart {
+                height: 150px !important;
+            }
+         }
       </style>
    </head>
    <body>
-      <div class="container">
+      <!-- Information Hub (Default View) -->
+      <div id="information-hub" class="container">
          <header>
-            <h1>🏢 Company Information Database</h1>
-            <p>Comprehensive organisational data with BSC information across multiple countries</p>
+            <h1>🏢 Wienerberger Information Hub</h1>
+            <p>Comprehensive organisational data with SAP compliance dashboard</p>
          </header>
          <div class="search-bar">
             <div class="search-input-container">
@@ -560,6 +1164,7 @@
                <button class="filter-btn" data-filter="bsc-live">✅ BSC Live</button>
                <button class="filter-btn" data-filter="roles">🔄 Roles</button>
                <button class="filter-btn" data-filter="general-info">📚 General Info</button>
+               <button class="filter-btn" data-filter="sap-compliance" onclick="showSAPFullPage()">📈 SAP Compliance</button>
             </div>
          </div>
          <div class="stats-bar">
@@ -570,107 +1175,269 @@
             <!-- Companies will be inserted here -->
          </div>
       </div>
-      <script>
-// SIMPLE PIN PROTECTION - Add this at the start
-(function() {
-    const correctPin = "2025";
-    let attempts = 0;
-    const maxAttempts = 3;
-    
-    // Hide the main content initially
-    const container = document.querySelector('.container');
-    if (container) {
-        container.style.display = 'none';
-    }
-    
-    function showPinDialog() {
-        const pinHTML = `
-            <div id="pinOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; justify-content: center; align-items: center; z-index: 10000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-                <div style="background: #f8f9fa; padding: 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); text-align: center; border: 2px solid #667eea; max-width: 400px;">
-                    <h2 style="color: #1e3c72; margin-bottom: 10px;">🔐 Secure Access</h2>
-                    <p style="color: #495057; margin-bottom: 25px;">Enter PIN to access this Document</p>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label for="pinInput" style="display: block; margin-bottom: 8px; font-weight: bold; color: #495057; text-align: left;">Password:</label>
-                        <input type="password" id="pinInput" placeholder="Enter PIN"  maxlength="4"
-                               style="padding: 12px; font-size: 18px; width: 100%; text-align: center; 
-                                      border: 2px solid #ddd; border-radius: 6px; margin-bottom: 10px;">
-                    </div>
-                    
-                    <button onclick="checkPin()" 
-                            style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; width: 100%;">
-                        Unlock Document 🔓
-                    </button>
-                    
-                    <div id="errorMessage" style="color: #dc3545; margin-top: 15px; font-size: 0.9em;"></div>
-                    <div style="color: #666; font-size: 0.8em; margin-top: 15px;">
-                        Attempts remaining: <span id="attemptsCount">${maxAttempts}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', pinHTML);
-        
-        // Focus and Enter key
-        setTimeout(() => {
-            const pinInput = document.getElementById('pinInput');
-            if (pinInput) {
-                pinInput.focus();
-                pinInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        checkPin();
-                    }
-                });
-            }
-        }, 100);
-    }
-    
-    window.checkPin = function() {
-        const pinInput = document.getElementById('pinInput');
-        const errorMessage = document.getElementById('errorMessage');
-        const attemptsCount = document.getElementById('attemptsCount');
-        const overlay = document.getElementById('pinOverlay');
-        const container = document.querySelector('.container');
-        
-        const enteredPin = pinInput.value;
 
-        if (enteredPin === correctPin) {
-            // Correct PIN - show content and remove overlay
-            if (container) {
-                container.style.display = 'block';
-            }
-            if (overlay) {
-                overlay.remove();
-            }
-        } else {
-            attempts++;
-            const remaining = maxAttempts - attempts;
-            
-            if (attemptsCount) attemptsCount.textContent = remaining;
-            
-            if (attempts >= maxAttempts) {
-                document.body.innerHTML = `
-                    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-                        <div style="text-align: center;">
-                            <h1 style="font-size: 2.5em; margin-bottom: 20px;">🚫 Access Denied</h1>
-                            <p style="font-size: 1.2em;">Too many failed attempts.</p>
-                        </div>
-                    </div>
-                `;
-            } else {
-                if (errorMessage) {
-                    errorMessage.textContent = `Incorrect PIN. ${remaining} attempt(s) remaining.`;
-                }
-                pinInput.value = '';
-                pinInput.focus();
-            }
-        }
-    };
-    
-    // Show PIN dialog
-    showPinDialog();
-})();
+      <!-- SAP Compliance Full Page View -->
+      <div id="sap-full-page" class="sap-full-page">
+         <button class="back-to-hub" onclick="showInformationHub()">
+            <i class="fas fa-arrow-left"></i> Back to Information Hub
+         </button>
+         <div class="sap-full-container">
+            <div class="sap-header">
+               <h1>🔍 SAP Compliance Dashboard</h1>
+               <p>Comprehensive analysis of user accounts</p>
+            </div>
+
+            <!-- COMPACT FILE UPLOAD SECTION -->
+            <div class="file-upload">
+               <h3>Upload Your Data Files</h3>
+               <div class="upload-container">
+                  <div class="upload-box">
+                     <div class="upload-icon">
+                        <i class="fas fa-users"></i>
+                     </div>
+                     <div class="upload-title">Active Directory Data</div>
+                     <div class="file-input-wrapper">
+                        <input type="file" id="adFile" accept=".csv,.xlsx,.xls" onchange="updateFileName(this, 'adFileName')">
+                        <label for="adFile" class="file-input-label">
+                           <i class="fas fa-file-upload"></i> Choose AD File
+                        </label>
+                     </div>
+                     <div id="adFileName" class="file-name">No file selected</div>
+                     <button class="upload-btn" onclick="loadADFile()">Load AD Data</button>
+                  </div>
+                  
+                  <div class="upload-box">
+                     <div class="upload-icon">
+                        <i class="fas fa-database"></i>
+                     </div>
+                     <div class="upload-title">SAP User Data</div>
+                     <div class="file-input-wrapper">
+                        <input type="file" id="sapFile" accept=".csv,.xlsx,.xls" onchange="updateFileName(this, 'sapFileName')">
+                        <label for="sapFile" class="file-input-label">
+                           <i class="fas fa-file-upload"></i> Choose SAP File
+                        </label>
+                     </div>
+                     <div id="sapFileName" class="file-name">No file selected</div>
+                     <button class="upload-btn" onclick="loadSAPFile()">Load SAP Data</button>
+                  </div>
+               </div>
+               <p><small>Supported formats: CSV, Excel (.xlsx, .xls)</small></p>
+            </div>
+            <!-- END OF COMPACT FILE UPLOAD SECTION -->
+
+            <div id="dashboard" style="display: none;">
+               <div class="nav-tabs">
+                  <button class="active" onclick="showSection('adOverview')">AD Overview</button>
+                  <button onclick="showSection('sapOverview')">SAP Overview</button>
+               </div>
+
+               <div id="adOverview" class="section active">
+                  <div class="kpi-grid">
+                     <div class="kpi-card blue">
+                        <div class="kpi-title">Total Users</div>
+                        <div class="kpi-value" id="totalUsers">0</div>
+                     </div>
+                     <div class="kpi-card green">
+                        <div class="kpi-title">Active Users</div>
+                        <div class="kpi-value" id="activeUsers">0</div>
+                        <div class="kpi-subtitle" id="activePercent"></div>
+                     </div>
+                     <div class="kpi-card red">
+                        <div class="kpi-title">Inactive Users</div>
+                        <div class="kpi-value" id="inactiveUsers">0</div>
+                        <div class="kpi-subtitle" id="inactivePercent"></div>
+                     </div>
+                     <div class="kpi-card purple">
+                        <div class="kpi-title">KIO Users</div>
+                        <div class="kpi-value" id="kioUsers">0</div>
+                        <div class="kpi-subtitle" id="kioPercent"></div>
+                     </div>
+                     <div class="kpi-card orange">
+                        <div class="kpi-title">External Users</div>
+                        <div class="kpi-value" id="externalUsers">0</div>
+                        <div class="kpi-subtitle" id="externalPercent"></div>
+                     </div>
+                     <div class="kpi-card teal">
+                        <div class="kpi-title">Full Users</div>
+                        <div class="kpi-value" id="fullUsers">0</div>
+                        <div class="kpi-subtitle" id="fullPercent"></div>
+                     </div>
+                  </div>
+
+                  <div class="chart-grid">
+                     <div class="status-chart-container">
+                        <div class="chart-title">AD Account Overview</div>
+                        <canvas id="statusChart"></canvas>
+                     </div>
+                  </div>
+
+                  <!-- User Type Summary -->
+                  <div class="chart-container">
+                     <div class="chart-title">Account State Summary</div>
+                     <div class="data-grid" id="userTypeSummary"></div>
+                  </div>
+               </div>
+
+               <div id="sapOverview" class="section">
+                  <div class="kpi-grid">
+                     <div class="kpi-card blue">
+                        <div class="kpi-title">Total Accounts</div>
+                        <div class="kpi-value" id="sapTotalAccounts">0</div>
+                     </div>
+                     <div class="kpi-card green">
+                        <div class="kpi-title">A Dialog Users</div>
+                        <div class="kpi-value" id="sapADialog">0</div>
+                        <div class="kpi-subtitle" id="sapADialogPercent"></div>
+                     </div>
+                     <div class="kpi-card red">
+                        <div class="kpi-title">B System Users</div>
+                        <div class="kpi-value" id="sapBSystem">0</div>
+                        <div class="kpi-subtitle" id="sapBSystemPercent"></div>
+                     </div>
+                     <div class="kpi-card purple">
+                        <div class="kpi-title">S Service Users</div>
+                        <div class="kpi-value" id="sapSService">0</div>
+                        <div class="kpi-subtitle" id="sapSServicePercent"></div>
+                     </div>
+                     <div class="kpi-card teal">
+                        <div class="kpi-title">Expired Users</div>
+                        <div class="kpi-value" id="sapExpiredUsers">0</div>
+                        <div class="kpi-subtitle" id="sapExpiredPercent"></div>
+                     </div>
+                  </div>
+
+                  <div class="chart-grid">
+                     <div class="sap-chart-container">
+                        <div class="chart-title">SAP User Account Analysis</div>
+                        <canvas id="sapUserChart"></canvas>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Loading indicator -->
+            <div id="loading" class="loading" style="display: none;">
+               <div class="loading-container">
+                  <div class="loading-spinner">
+                     <div class="spinner"></div>
+                  </div>
+                  <h3>Processing Data</h3>
+                  <div class="progress-container">
+                     <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                     </div>
+                     <div class="progress-text">
+                        <span id="progressPercentage">10%</span>
+                        <span id="progressStatus">Initialising...</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <script>
+         // SIMPLE PIN PROTECTION - Add this at the start
+         (function() {
+             const correctPin = "2025";
+             let attempts = 0;
+             const maxAttempts = 3;
+             
+             // Hide the main content initially
+             const container = document.querySelector('.container');
+             if (container) {
+                 container.style.display = 'none';
+             }
+             
+             function showPinDialog() {
+                 const pinHTML = `
+                     <div id="pinOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; justify-content: center; align-items: center; z-index: 10000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                         <div style="background: #f8f9fa; padding: 40px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); text-align: center; border: 2px solid #667eea; max-width: 400px;">
+                             <h2 style="color: #1e3c72; margin-bottom: 10px;">🔐 Secure Access</h2>
+                             <p style="color: #495057; margin-bottom: 25px;">Enter PIN to access this Document</p>
+                             
+                             <div style="margin-bottom: 20px;">
+                                 <input type="password" id="pinInput" placeholder="Enter PIN" maxlength="4"
+       style="padding: 12px; font-size: 18px; width: 100%; text-align: center; 
+              border: 2px solid #edca77; border-radius: 6px; margin-bottom: 10px;
+              outline: none;">
+                             </div>
+                             
+                             <button onclick="checkPin()" 
+        style="padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; width: 100%; transition: all 0.3s ease;">
+    Unlock Document 🔓
+</button>
+                             
+                             <div id="errorMessage" style="color: #dc3545; margin-top: 15px; font-size: 0.9em;"></div>
+                             <div style="color: #666; font-size: 0.8em; margin-top: 15px;">
+                                 Attempts remaining: <span id="attemptsCount">${maxAttempts}</span>
+                             </div>
+                         </div>
+                     </div>
+                 `;
+                 
+                 document.body.insertAdjacentHTML('beforeend', pinHTML);
+                 
+                 // Focus and Enter key
+                 setTimeout(() => {
+                     const pinInput = document.getElementById('pinInput');
+                     if (pinInput) {
+                         pinInput.focus();
+                         pinInput.addEventListener('keypress', function(e) {
+                             if (e.key === 'Enter') {
+                                 checkPin();
+                             }
+                         });
+                     }
+                 }, 100);
+             }
+             
+             window.checkPin = function() {
+                 const pinInput = document.getElementById('pinInput');
+                 const errorMessage = document.getElementById('errorMessage');
+                 const attemptsCount = document.getElementById('attemptsCount');
+                 const overlay = document.getElementById('pinOverlay');
+                 const container = document.querySelector('.container');
+                 
+                 const enteredPin = pinInput.value;
+
+                 if (enteredPin === correctPin) {
+                     // Correct PIN - show content and remove overlay
+                     if (container) {
+                         container.style.display = 'block';
+                     }
+                     if (overlay) {
+                         overlay.remove();
+                     }
+                 } else {
+                     attempts++;
+                     const remaining = maxAttempts - attempts;
+                     
+                     if (attemptsCount) attemptsCount.textContent = remaining;
+                     
+                     if (attempts >= maxAttempts) {
+                         document.body.innerHTML = `
+                             <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                                 <div style="text-align: center;">
+                                     <h1 style="font-size: 2.5em; margin-bottom: 20px;">🚫 Access Denied</h1>
+                                     <p style="font-size: 1.2em;">Too many failed attempts.</p>
+                                 </div>
+                             </div>
+                         `;
+                     } else {
+                         if (errorMessage) {
+                             errorMessage.textContent = `Incorrect PIN. ${remaining} attempt(s) remaining.`;
+                         }
+                         pinInput.value = '';
+                         pinInput.focus();
+                     }
+                 }
+             };
+             
+             // Show PIN dialog
+             showPinDialog();
+         })();
+
          // User Group mapping
          const userGroups = {
              "1101": "WB-NL",
@@ -753,6 +1520,7 @@
          };
          
          // All Companies Data
+        // All Companies Data
          const allCompanies = [
              { code: "0001", name: "SAP Italia S.p.A.", city: "Agrate Brianza", country: "IT" },
              { code: "1101", name: "Wienerberger B.V.", city: "Zaltbommel", country: "NL" },
@@ -1378,6 +2146,8 @@
                  notes: "only wienerberger"
              }
          ];
+         
+        
          
          // Roles Data
          const rolesData = 
@@ -41717,510 +42487,633 @@
          ]
          ;
          
-         // Function to render companies
-         function renderCompanies(companies, isBSC = false, isRoles = false, isGeneralInfo = false) {
-         const companyList = document.getElementById('companyList');
-         const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
          
-         // Handle General Info tab
-         if (activeFilter === 'general-info') {
-         companyList.innerHTML = `
-         <div class="info-section">
-         <h3>🔗 Quick Access Links</h3>
-         <div class="company-details">
-         <div class="detail-item">
-            <div class="detail-value">
-                <a href="https://wbag.sharepoint.com/sites/intra-collab-dataroom-Saviynt_Informations_Hub" target="_blank">ℹ️ SAP Compliance Info Hub</a>
-            </div>
-         </div>
-         <div class="detail-item">
-            <div class="detail-value">
-                <a href="https://ssm-wienerberger.saviyntcloud.com/ECMv6/request/requestHome" target="_blank">🔐 Saviynt</a>
-            </div>
-         </div>
-         <div class="detail-item">
-            <div class="detail-value">
-                <a href="https://wbprod01.service-now.com/now/nav/ui/classic/params/target/%2Ftask_list.do%3Fsysparm_userpref_module%3D2ccb50dfc61122820032728dcea648fe%26sysparm_query%3Dactive%3Dtrue%5Eassignment_groupDYNAMICd6435e965f510100a9ad2572f2b47744%5Eassigned_toISEMPTY%5EEQ%26sysparm_clear_stack%3Dtrue" target="_blank">🛠️ ITSM</a>
-            </div>
-         </div>
-         <div class="detail-item">
-            <div class="detail-value">
-                <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B9ECABE72-442E-42CE-859D-A781AFF573A0%7D&file=Saviynt%20Key%20Users.xlsx&action=default&mobileredirect=true" target="_blank">👥 Saviynt Key Users</a>
-            </div>
-         </div>
-         <div class="detail-item">
-            <div class="detail-value">
-                <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B8E269E0C-581A-4EA2-A96A-CB3808F2DDFB%7D&file=SAP%20S4%20Transactions%20per%20Role%20in%20SAP%20Production%20System.xlsx&action=default&mobileredirect=true" target="_blank">⚙️ Role and Transaction</a>
-            </div>
-         </div>
-         <div class="detail-item">
-            <div class="detail-value">
-                <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B20E8C0C1-53A5-4183-93D9-1D68DE59E00A%7D&file=zzunlock%20Key-User%20List.xlsx&action=default&mobileredirect=true" target="_blank">🔓 Users With ZZUNLOCK</a>
-            </div>
-         </div>
-         <div class="detail-item">
-            <div class="detail-value">
-                <a href="https://portal.einstein.local/corp/gcdb/SitePages/Home.aspx" target="_blank" style=" font-weight: bold;">🌍 GCDB</a>
-            </div>
-         </div>
-         <div class="detail-item">
-         <div class="detail-value">
-         <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8em;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <strong style="color: #1e3c72; font-size: 0.95em; min-width: 40px;">🌩️ C4C</strong>
-                <a href="https://my357901-sso.crm.ondemand.com/sap/ap/ui/repository/SAP_UI/HTML5/newclient.html?app.component=/SAP_UI_CT/Main/root.uiccwoc&rootWindow=X&redirectUrl=/sap/byd/runtime&sap-ui-language=en_us#Nav/0/eyJfc1dvY0lkIjpudWxsLCJfc1ZpZXdJZCI6bnVsbCwiX3NQZXJmb3JtYW5jZVdvY0lkIjoiSG9tZSIsIl9zUGVyZm9ybWFuY2VWaWV3SWQiOiJIb21lIiwiX3NDb250ZXh0SWQiOiJhNjc2MjIwODRmN2Y3OGUzYTU3MmE1YTYzNTBkMjk3OCJ9" target="_blank" style="padding: 3px 6px; background: #e8f5e8; border-radius: 3px; text-align: center; font-size: 0.75em; text-decoration: none; color: #333;">🟢 PROD</a>
-                <a href="https://my349256-sso.crm.ondemand.com/sap/ap/ui/repository/SAP_UI/HTML5/newclient.html?app.component=/SAP_UI_CT/Main/root.uiccwoc&rootWindow=X&redirectUrl=/sap/byd/runtime&sap-ui-language=en_us#Nav/0/eyJfc1dvY0lkIjpudWxsLCJfc1ZpZXdJZCI6bnVsbCwiX3NQZXJmb3JtYW5jZVdvY0lkIjoiSG9tZSIsIl9zUGVyZm9ybWFuY2VWaWV3SWQiOiJIb21lIiwiX3NDb250ZXh0SWQiOiI1ZDIxZmRelNTRjYzZjN2RhMTU4MjI1ZWNiODIxMjRhYiJ9" target="_blank" style="padding: 3px 6px; background: #fff3cd; border-radius: 3px; text-align: center; font-size: 0.75em; text-decoration: none; color: #333;">🟡 TEST</a>
-                <a href="https://my358108-sso.crm.ondemand.com/sap/ap/ui/repository/SAP_UI/HTML5/newclient.html?app.component=/SAP_UI_CT/Main/root.uiccwoc&rootWindow=X&redirectUrl=/sap/byd/runtime&sap-ui-language=en_us#Nav/0/eyJfc1dvY0lkIjpudWxsLCJfc1ZpZXdJZCI6bnVsbCwiX3NQZXJmb3JtYW5jZVdvY0lkIjoiSG9tZSIsIl9zUGVyZm9ybWFuY2VWaWV3SWQiOiJIb21lIiwiX3NDb250ZXh0SWQiOiI5ZDYyZDUwYmY0M2YxNjk2ZWQzMzFmYmJmMDU0ZGZkNCJ9" target="_blank" style="padding: 3px 6px; background: #e7f3ff; border-radius: 3px; text-align: center; font-size: 0.75em; text-decoration: none; color: #333;">🔵 DEV</a>
-            </div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <strong style="color: #1e3c72; font-size: 0.95em; min-width: 40px;">📈 SAC</strong>
-                <a href="https://wienerberger-1.eu10.hcs.cloud.sap/sap/fpa/ui/app.html#/home" target="_blank" style="padding: 3px 6px; background: #e8f5e8; border-radius: 3px; text-align: center; font-size: 0.75em; text-decoration: none; color: #333;">🟢 PROD</a>
-                <a href="https://wienerberger-q.eu10.hcs.cloud.sap/sap/fpa/ui/app.html#/home&/h/catalog/?filter=1BA003879DEF08AF25FB06BBF9DA35F1,2BA003879DEF1C54CFE3C8E0ECF8445B,DA0020849ECE51AE3D4E3E03DA74CDAE&sort=recently-published&filterpanelopen=true" target="_blank" style="padding: 3px 6px; background: #fff3cd; border-radius: 3px; text-align: center; font-size: 0.75em; text-decoration: none; color: #333;">🟡 TEST</a>
-            </div>
-         </div>
-         </div>
-         </div>
-         </div>
-         </div>
-             </div>
-         
-             <div class="info-section">
-                 <h3>⚠️ Approval Requirements for Critical Roles and Profiles</h3>
-                 <div class="approval-info">
-                     <p><strong>Always obtain approval for SAP_ALL and all SAP_NEW authorisations</strong> for new or existing users in both WPR and WBP from:</p>
-                     <ul>
-                         <li><strong>WBP:</strong> Thomas Landl</li>
-                         <li><strong>WPR:</strong> Ernst Tschach</li>
-                     </ul>
-                     <div class="critical-note">
-                         <strong>⚠️ Important:</strong> CIT roles are always critical to assign. Please confirm before assigning CIT roles.
-                     </div>
-                 </div>
-             </div>
-         
-             <div class="info-section">
-                 <h3>📞 Contact Persons for SAP Systems</h3>
-                 <div class="contact-table-container">
-                     <table class="contact-table">
-                         <thead>
-                             <tr>
-                                 <th>SAP System / Modules</th>
-                                 <th>Contact Person</th>
-                             </tr>
-                         </thead>
-                         <tbody>
-                             <tr>
-                                 <td><strong>WPR</strong></td>
-                                 <td>Ernst Tschach</td>
-                             </tr>
-                             <tr>
-                                 <td><strong>WBP, WCP</strong></td>
-                                 <td>Thomas Landl</td>
-                             </tr>
-                             <tr>
-                                 <td><strong>MM, SD</strong></td>
-                                 <td>Gabor Tisler</td>
-                             </tr>
-                             <tr>
-                                 <td><strong>Warehouse Management (MM, MII)</strong></td>
-                                 <td>Janusz Gren</td>
-                             </tr>
-                             <tr>
-                                 <td><strong>ISO/Marlin Vendor</strong></td>
-                                 <td>Melinda Hazi</td>
-                             </tr>
-                         </tbody>
-                     </table>
-                 </div>
-             </div>
-         
-             <div class="info-section">
-         <h3>ℹ️ About This Document</h3>
-         <div class="about-info">
-         <p>This document was prepared by Samundra to facilitate quicker and easier access to essential information. It provides comprehensive organisational data, including BSC (Business Service Center) information, across multiple countries within the Wienerberger Group. Use the search and filter functions above to find specific companies, BSC status details, or SAP roles and authorisations. All data and access links are sourced exclusively from the official Excel file.</p>
-         </div>
-         </div>
-         `;
-         updateStats([], false, false, true);
-         return;
+         // SAP Compliance Dashboard Variables
+         let adUserData = [];
+         let sapUserData = [];
+
+         // Function to update file name display
+         function updateFileName(input, displayElementId) {
+             const fileName = input.files[0] ? input.files[0].name : 'No file selected';
+             document.getElementById(displayElementId).textContent = fileName;
          }
-         
-         if (isRoles) {
-         if (companies.length === 0) {
-         console.log("No roles to display");
-         companyList.innerHTML = `
-             <div class="no-results">
-                 <h3>No roles found</h3>
-                 <p>Try adjusting your search or filter criteria</p>
-             </div>
-         `;
-         return;
-         }
-         console.log("Rendering roles:", companies.map(r => r.motherRole));
-         companyList.innerHTML = companies.map(role => {
-         const sodBadgeClass = role.sodApproval && role.sodApproval.toLowerCase() === 'yes' ? 'sod-yes' : 'sod-no';
-         const sodBadgeText = role.sodApproval && role.sodApproval.toLowerCase() === 'yes' ? 'SOD Approval Required' : 'No SOD Approval';
-         
-         return `
-             <div class="role-card">
-                 <div class="role-header">
-                     <div class="role-title">
-                         <h2>${role.motherRole}</h2>
-                         <div class="role-description">${role.description}</div>
-                     </div>
-                     <div class="role-badges">
-                         <div class="sod-badge ${sodBadgeClass}">${sodBadgeText}</div>
-                     </div>
-                 </div>
-                 
-                 <div class="company-details">
-                     ${role.additionalRoles ? `
-                     <div class="detail-item highlight">
-                         <div class="detail-label">Additional Roles</div>
-                         <div class="detail-value">${role.additionalRoles}</div>
-                     </div>
-                     ` : ''}
-                     
-                     <div class="detail-item">
-                         <div class="detail-label">SOD Approval</div>
-                         <div class="detail-value">${role.sodApproval || 'No'}</div>
-                     </div>
-                 </div>
-                 
-                 ${role.transactions.length > 0 ? `
-                 <div class="transactions">
-                     <div class="transactions-title">Transactions (${role.transactions.length})</div>
-                     <div class="transaction-list">
-                         ${role.transactions.map(transaction => `
-                             <div class="transaction-item">
-                                 <div>
-                                     <span class="transaction-code">${transaction.code}</span>
-                                     <div class="transaction-description">${transaction.description}</div>
-                                 </div>
-                             </div>
-                         `).join('')}
-                     </div>
-                 </div>
-                 ` : ''}
-             </div>
-         `;
-         }).join('');
-         }
-         else if (isBSC) {
-         if (companies.length === 0) {
-         console.log("No BSC companies to display");
-         companyList.innerHTML = `
-             <div class="no-results">
-                 <h3>No BSC companies found</h3>
-                 <p>Try adjusting your search or filter criteria</p>
-             </div>
-         `;
-         return;
-         }
-         companyList.innerHTML = companies.map(company => {
-             const bscClass = getBSCClass(company.bscStatus);
-             const bscBadge = getBSCBadge(company.bscStatus);
+
+         function loadADFile() {
+             const fileInput = document.getElementById('adFile');
+             const file = fileInput.files[0];
              
-             return `
-                 <div class="company-card ${bscClass}">
-                     <div class="company-header">
-                         <div class="company-title">
-                             <h2>${company.name}</h2>
-                             <div class="company-details">
-                                 <div class="detail-item">
-                                     <div class="detail-label">Country</div>
-                                     <div class="detail-value">${company.country}</div>
-                                 </div>
-                                 ${company.cfd ? `
-                                 <div class="detail-item">
-                                     <div class="detail-label">CFD</div>
-                                     <div class="detail-value">${company.cfd}</div>
-                                 </div>
-                                 ` : ''}
-                             </div>
-                         </div>
-                         <div class="company-badges">
-                             <div class="company-code">${company.code}</div>
-                             ${bscBadge}
-                         </div>
-                     </div>
+             if (!file) {
+                 alert('Please select an AD file');
+                 return;
+             }
+
+             document.getElementById('loading').style.display = 'block';
+
+             const reader = new FileReader();
+             
+             reader.onload = function(e) {
+                 try {
+                     const data = e.target.result;
                      
-                     ${company.notes ? `
-                     <div class="detail-item highlight">
-                         <div class="detail-label">Notes</div>
-                         <div class="detail-value">${company.notes}</div>
-                     </div>
-                     ` : ''}
+                     if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                         processExcelFile(data, 'AD');
+                     } else {
+                         processCSVFile(data, 'AD');
+                     }
+                 } catch (error) {
+                     console.error('Error processing AD file:', error);
+                     alert('Error processing AD file: ' + error.message);
+                     document.getElementById('loading').style.display = 'none';
+                 }
+             };
+             
+             reader.onerror = function() {
+                 alert('Error reading AD file');
+                 document.getElementById('loading').style.display = 'none';
+             };
+             
+             if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                 reader.readAsArrayBuffer(file);
+             } else {
+                 reader.readAsText(file);
+             }
+         }
+
+         function loadSAPFile() {
+             const fileInput = document.getElementById('sapFile');
+             const file = fileInput.files[0];
+             
+             if (!file) {
+                 alert('Please select a SAP file');
+                 return;
+             }
+
+             document.getElementById('loading').style.display = 'block';
+
+             const reader = new FileReader();
+             
+             reader.onload = function(e) {
+                 try {
+                     const data = e.target.result;
                      
-                     ${company.subsidiaries && company.subsidiaries.length > 0 ? `
-                     <div class="subsidiaries">
-                         <div class="subsidiaries-title">Subsidiaries & Associated Companies</div>
-                         <div class="subsidiary-list">
-                             ${company.subsidiaries.map(subsidiary => `
-                                 <div class="subsidiary-item">
-                                     <strong>${subsidiary.code || 'N/A'}</strong> - ${subsidiary.name}
-                                 </div>
-                             `).join('')}
-                         </div>
-                     </div>
-                     ` : ''}
-                 </div>
-             `;
-         }).join('');
-         } else {
-         if (companies.length === 0) {
-         console.log("No companies to display");
-         companyList.innerHTML = `
-             <div class="no-results">
-                 <h3>No companies found</h3>
-                 <p>Try adjusting your search or filter criteria</p>
-             </div>
-         `;
-         return;
+                     if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                         processExcelFile(data, 'SAP');
+                     } else {
+                         processCSVFile(data, 'SAP');
+                     }
+                 } catch (error) {
+                     console.error('Error processing SAP file:', error);
+                     alert('Error processing SAP file: ' + error.message);
+                     document.getElementById('loading').style.display = 'none';
+                 }
+             };
+             
+             reader.onerror = function() {
+                 alert('Error reading SAP file');
+                 document.getElementById('loading').style.display = 'none';
+             };
+             
+             if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                 reader.readAsArrayBuffer(file);
+             } else {
+                 reader.readAsText(file);
+             }
          }
-         companyList.innerHTML = companies.map(company => {
-             const userGroup = userGroups[company.code] || 'N/A';
-             return `
-                 <div class="company-card">
-                     <div class="company-header">
-                         <div class="company-title">
-                             <h2>${company.name}</h2>
-                             <div class="company-details">
-                                 <div class="detail-item">
-                                     <div class="detail-label">Country</div>
-                                     <div class="detail-value">${company.country}</div>
-                                 </div>
-                                 <div class="detail-item">
-                                     <div class="detail-label">City</div>
-                                     <div class="detail-value">${company.city || 'N/A'}</div>
-                                 </div>
-                             </div>
-                         </div>
-                         <div class="company-badges">
-                             <div class="company-code">${company.code}</div>
-                             <div class="user-group">${userGroup}</div>
-                         </div>
-                     </div>
-                 </div>
-             `;
-         }).join('');
-         }
-         
-         // Update stats
-         updateStats(companies, isBSC, isRoles);
-         }
-         
-         // Helper function to get BSC status class
-         function getBSCClass(bscStatus) {
-         if (!bscStatus) return '';
-         if (bscStatus.toLowerCase().includes('live')) return 'bsc-live';
-         if (bscStatus.toLowerCase().includes('forming')) return 'bsc-forming';
-         if (bscStatus.toLowerCase().includes('partial')) return 'general-info';
-         return '';
-         }
-         
-         // Helper function to get BSC badge HTML
-         function getBSCBadge(bscStatus) {
-         if (!bscStatus) return '';
-         let badgeClass = '';
-         if (bscStatus.toLowerCase().includes('live')) badgeClass = 'bsc-live-badge';
-         else if (bscStatus.toLowerCase().includes('forming')) badgeClass = 'bsc-forming-badge';
-         else if (bscStatus.toLowerCase().includes('partial')) badgeClass = 'general-info-badge';
-         
-         return badgeClass ? `<div class="bsc-badge ${badgeClass}">${bscStatus}</div>` : '';
-         }
-         
-         
-         // Update the updateStats function to handle search in General Info
-         function updateStats(companies, isBSC, isRoles, isGeneralInfo = false, searchTerm = '') {
-         const companyCount = document.getElementById('companyCount');
-         const bscStats = document.getElementById('bscStats');
-         
-         if (isGeneralInfo) {
-         if (searchTerm) {
-             companyCount.textContent = `General Information - Search: "${searchTerm}"`;
-         } else {
-             companyCount.textContent = `General Information`;
-         }
-         bscStats.textContent = `Wienerberger AG`;
-         } else if (isRoles) {
-         companyCount.textContent = `Showing ${companies.length} roles`;
-         bscStats.textContent = `Roles: ${rolesData.length}`;
-         } else if (isBSC) {
-         companyCount.textContent = `Showing ${companies.length} companies`;
-         const liveCount = companies.filter(c => c.bscStatus && c.bscStatus.toLowerCase().includes('live')).length;
-         const partialCount = companies.filter(c => c.bscStatus && c.bscStatus.toLowerCase().includes('partial')).length;
-         bscStats.textContent = `BSC Live: ${liveCount} | BSC Partial: ${partialCount}`;
-         } else {
-         companyCount.textContent = `Showing ${companies.length} companies`;
-         const europeCount = companies.filter(c => 
-             ['NL', 'BE', 'DE', 'FR', 'AT', 'LU', 'CH', 'IT', 'NO', 'SE', 'DK', 'FI', 'GB', 'IE', 'EE', 'HU', 'CZ', 'SK', 'PL', 'HR', 'RO', 'BA', 'BG', 'RS', 'MK', 'SI'].includes(c.country)
-         ).length;
-         const northAmericaCount = companies.filter(c => 
-             ['US', 'CA'].includes(c.country)
-         ).length;
-         const otherCount = companies.length - europeCount - northAmericaCount;
-         bscStats.textContent = `Europe: ${europeCount} | North America: ${northAmericaCount} | Other: ${otherCount}`;
-         }
-         }
-         
-         // Filter and search functionality
-         function filterCompanies() {
-         const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-         const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
-         
-         console.log("Search term:", searchTerm);
-         console.log("Active filter:", activeFilter);
-         
-         let companiesToShow = [];
-         let isBSC = false;
-         let isRoles = false;
-         let isGeneralInfo = false;
-         
-         if (activeFilter === 'all') {
-         companiesToShow = allCompanies;
-         isBSC = false;
-         isRoles = false;
-         isGeneralInfo = false;
-         } else if (activeFilter === 'roles') {
-         companiesToShow = rolesData;
-         isBSC = false;
-         isRoles = true;
-         isGeneralInfo = false;
-         console.log("Roles data loaded:", rolesData.length, "roles");
-         } else if (activeFilter === 'bsc-live') {
-         companiesToShow = bscCompanies.filter(company => 
-             company.bscStatus && company.bscStatus.toLowerCase().includes('live')
-         );
-         isBSC = true;
-         isRoles = false;
-         isGeneralInfo = false;
-         } else if (activeFilter === 'general-info') {
-         // For General Info tab, we'll handle search differently
-         isBSC = false;
-         isRoles = false;
-         isGeneralInfo = true;
-         
-         // If there's a search term, we need to filter the General Info content
-         if (searchTerm) {
-             // Create a filtered version of General Info content based on search
-             renderFilteredGeneralInfo(searchTerm);
-             return;
-         } else {
-             // No search term, show normal General Info
-             renderCompanies([], false, false, true);
-             return;
-         }
-         }
-         
-         // Apply search filter for other tabs
-         if (searchTerm) {
-         console.log("Applying search filter for term:", searchTerm);
-         
-         if (isRoles) {
-             console.log("Searching in roles...");
-             companiesToShow = companiesToShow.filter(role => {
-                 const roleMatches = 
-                     role.motherRole.toLowerCase().includes(searchTerm) ||
-                     role.description.toLowerCase().includes(searchTerm) ||
-                     (role.sodApproval && role.sodApproval.toLowerCase().includes(searchTerm)) ||
-                     (role.additionalRoles && role.additionalRoles.toLowerCase().includes(searchTerm));
+
+         function processExcelFile(data, type) {
+             try {
+                 const workbook = XLSX.read(data, { type: 'array' });
+                 const firstSheetName = workbook.SheetNames[0];
+                 const worksheet = workbook.Sheets[firstSheetName];
+                 const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                  
-                 const transactionMatches = role.transactions.some(transaction => 
-                     transaction.code.toLowerCase().includes(searchTerm) ||
-                     transaction.description.toLowerCase().includes(searchTerm)
-                 );
-                 
-                 const matches = roleMatches || transactionMatches;
-                 
-                 if (matches) {
-                     console.log("Found matching role:", role.motherRole);
+                 if (jsonData.length < 2) {
+                     throw new Error(`${type} file is empty or has no data`);
                  }
                  
-                 return matches;
+                 const headers = jsonData[0].map(h => String(h).trim());
+                 const userData = jsonData.slice(1).map(row => {
+                     const obj = {};
+                     headers.forEach((header, index) => {
+                         const value = row[index];
+                         obj[header] = value !== undefined && value !== null ? String(value).trim() : '';
+                     });
+                     return obj;
+                 }).filter(row => {
+                     return Object.values(row).some(val => val !== '');
+                 });
+                 
+                 if (type === 'AD') {
+                     adUserData = userData;
+                     initializeADDashboard();
+                 } else {
+                     sapUserData = userData;
+                     console.log('SAP Data loaded:', userData.length, 'rows');
+                     console.log('Headers:', headers);
+                     console.log('First 3 rows:', userData.slice(0, 3));
+                     initializeSAPDashboard();
+                 }
+             } catch (error) {
+                 throw new Error(`Error processing ${type} file: ` + error.message);
+             }
+         }
+
+         function processCSVFile(data, type) {
+             try {
+                 const userData = parseCSV(data);
+                 if (userData.length === 0) {
+                     throw new Error(`${type} file is empty or has no data`);
+                 }
+                 
+                 if (type === 'AD') {
+                     adUserData = userData;
+                     initializeADDashboard();
+                 } else {
+                     sapUserData = userData;
+                     initializeSAPDashboard();
+                 }
+             } catch (error) {
+                 throw new Error(`Error processing ${type} file: ` + error.message);
+             }
+         }
+
+         function parseCSV(csv) {
+             const lines = csv.trim().split('\n');
+             const headers = lines[0].split(',').map(header => header.trim());
+             const data = [];
+             
+             for (let i = 1; i < lines.length; i++) {
+                 const values = parseCSVLine(lines[i]);
+                 const obj = {};
+                 headers.forEach((header, index) => {
+                     obj[header] = values[index] || '';
+                 });
+                 data.push(obj);
+             }
+             return data;
+         }
+
+         function parseCSVLine(line) {
+             const result = [];
+             let current = '';
+             let inQuotes = false;
+             
+             for (let i = 0; i < line.length; i++) {
+                 const char = line[i];
+                 
+                 if (char === '"') {
+                     inQuotes = !inQuotes;
+                 } else if (char === ',' && !inQuotes) {
+                     result.push(current.trim());
+                     current = '';
+                 } else {
+                     current += char;
+                 }
+             }
+             
+             result.push(current.trim());
+             return result;
+         }
+
+         function initializeADDashboard() {
+             document.getElementById('loading').style.display = 'none';
+             document.getElementById('dashboard').style.display = 'block';
+             
+             // Reset AD chart container styling
+             const adChartContainer = document.querySelector('.status-chart-container');
+             adChartContainer.style.height = 'auto';
+             adChartContainer.style.padding = '30px 40px';
+             
+             // Show/hide tabs
+             if (sapUserData.length === 0) {
+                 document.querySelector('button[onclick="showSection(\'sapOverview\')"]').style.display = 'none';
+             } else {
+                 document.querySelector('button[onclick="showSection(\'sapOverview\')"]').style.display = 'block';
+             }
+             document.querySelector('button[onclick="showSection(\'adOverview\')"]').style.display = 'block';
+             
+             calculateADKPIs();
+         }
+
+         function initializeSAPDashboard() {
+             document.getElementById('loading').style.display = 'none';
+             document.getElementById('dashboard').style.display = 'block';
+             
+             // Reset SAP chart container styling
+             const sapChartContainer = document.querySelector('.chart-container:has(#sapUserChart)');
+             if (sapChartContainer) {
+                 sapChartContainer.style.height = '450px';
+                 sapChartContainer.style.padding = '20px';
+             }
+             
+             // Show/hide tabs
+             if (adUserData.length === 0) {
+                 document.querySelector('button[onclick="showSection(\'adOverview\')"]').style.display = 'none';
+                 showSection('sapOverview');
+             } else {
+                 document.querySelector('button[onclick="showSection(\'adOverview\')"]').style.display = 'block';
+             }
+             document.querySelector('button[onclick="showSection(\'sapOverview\')"]').style.display = 'block';
+             
+             calculateSAPKPIs();
+         }
+
+         function calculateADKPIs() {
+             const totalUsers = adUserData.length;
+             const activeUsers = adUserData.filter(u => u.Account === 'enabled').length;
+             const inactiveUsers = adUserData.filter(u => u.Account === 'disabled').length;
+             const activePercent = ((activeUsers / totalUsers) * 100).toFixed(1);
+             const inactivePercent = ((inactiveUsers / totalUsers) * 100).toFixed(1);
+
+             const userTypeCount = {};
+             adUserData.forEach(user => {
+                 const userType = (user['Ext6 - UserType'] || 'Not Specified').trim().toLowerCase();
+                 userTypeCount[userType] = (userTypeCount[userType] || 0) + 1;
              });
-             console.log("Roles after search:", companiesToShow.length);
-         } else if (isBSC) {
-             companiesToShow = companiesToShow.filter(company => 
-                 company.name.toLowerCase().includes(searchTerm) ||
-                 company.code.toLowerCase().includes(searchTerm) ||
-                 company.country.toLowerCase().includes(searchTerm) ||
-                 (company.cfd && company.cfd.toLowerCase().includes(searchTerm)) ||
-                 (company.bscStatus && company.bscStatus.toLowerCase().includes(searchTerm)) ||
-                 (company.subsidiaries && company.subsidiaries.some(subsidiary => 
-                     subsidiary.name.toLowerCase().includes(searchTerm) ||
-                     (subsidiary.code && subsidiary.code.toLowerCase().includes(searchTerm))
-                 ))
-             );
-         } else {
-             companiesToShow = companiesToShow.filter(company => 
-                 company.name.toLowerCase().includes(searchTerm) ||
-                 company.code.toLowerCase().includes(searchTerm) ||
-                 company.city.toLowerCase().includes(searchTerm) ||
-                 company.country.toLowerCase().includes(searchTerm) ||
-                 (userGroups[company.code] && userGroups[company.code].toLowerCase().includes(searchTerm))
-             );
+
+             // Convert back to proper case for display
+             const displayUserTypeCount = {};
+             Object.entries(userTypeCount).forEach(([type, count]) => {
+                 const displayType = type === 'not specified' ? 'Not Specified' : type.toUpperCase();
+                 displayUserTypeCount[displayType] = count;
+             });
+
+             const kioUsers = countUserType(adUserData, 'kio');
+             const externalUsers = countUserType(adUserData, 'ext');
+             const fullUsers = countUserType(adUserData, 'ful');
+
+             const kioPercent = ((kioUsers / totalUsers) * 100).toFixed(1);
+             const externalPercent = ((externalUsers / totalUsers) * 100).toFixed(1);
+             const fullPercent = ((fullUsers / totalUsers) * 100).toFixed(1);
+
+             // Update AD Overview KPI cards
+             document.getElementById('totalUsers').textContent = totalUsers;
+             document.getElementById('activeUsers').textContent = activeUsers;
+             document.getElementById('activePercent').textContent = `${activePercent}% of total`;
+             document.getElementById('inactiveUsers').textContent = inactiveUsers;
+             document.getElementById('inactivePercent').textContent = `${inactivePercent}% of total`;
+             document.getElementById('kioUsers').textContent = kioUsers;
+             document.getElementById('kioPercent').textContent = `${kioPercent}% of total`;
+             document.getElementById('externalUsers').textContent = externalUsers;
+             document.getElementById('externalPercent').textContent = `${externalPercent}% of total`;
+             document.getElementById('fullUsers').textContent = fullUsers;
+             document.getElementById('fullPercent').textContent = `${fullPercent}% of total`;
+
+             createUserTypeSummary(displayUserTypeCount);
+             createStatusChart(activeUsers, inactiveUsers, kioUsers, externalUsers, fullUsers);
          }
+
+         function calculateSAPKPIs() {
+             const totalAccounts = sapUserData.length;
+             console.log('=== SAP KPI CALCULATION ===');
+             console.log('Total accounts:', totalAccounts);
+             
+             let aDialogUsers = 0;
+             let bSystemUsers = 0;
+             let sServiceUsers = 0;
+
+             sapUserData.forEach((user, index) => {
+                 const userType = (user['User Type'] || user['UserType'] || user['USER TYPE'] || 
+                                 user['User_Type'] || user['USER_TYPE'] || user.UserType || '').trim();
+                 
+                 if (index < 5) {
+                     console.log(`Row ${index + 1}: User Type = "${userType}"`);
+                 }
+                 
+                 if (userType === 'A Dialog') {
+                     aDialogUsers++;
+                 } else if (userType === 'B System') {
+                     bSystemUsers++;
+                 } else if (userType === 'S Service') {
+                     sServiceUsers++;
+                 }
+             });
+
+             console.log('A Dialog Users:', aDialogUsers);
+             console.log('B System Users:', bSystemUsers);
+             console.log('S Service Users:', sServiceUsers);
+
+             const aDialogPercent = totalAccounts > 0 ? ((aDialogUsers / totalAccounts) * 100).toFixed(1) : '0.0';
+             const bSystemPercent = totalAccounts > 0 ? ((bSystemUsers / totalAccounts) * 100).toFixed(1) : '0.0';
+             const sServicePercent = totalAccounts > 0 ? ((sServiceUsers / totalAccounts) * 100).toFixed(1) : '0.0';
+
+             const today = new Date();
+             today.setHours(0, 0, 0, 0);
+             
+             let expiredUsers = 0;
+             
+             sapUserData.forEach((user, index) => {
+                 // Try all possible column name variations
+                 const validTo = String(user['Valid to'] || user['Valid To'] || user['VALID TO'] || 
+                                user['Valid_to'] || user['VALID_TO'] || user.ValidTo || 
+                                user['ValidTo'] || user['Validto'] || user['validto'] || '').trim();
+                 
+                 if (index < 5) {
+                     console.log(`Row ${index + 1}: Valid to = "${validTo}"`);
+                 }
+                 
+                 // Skip empty values or rows with no valid to date
+                 if (!validTo || validTo === '') {
+                     return;
+                 }
+                 
+                 // Skip "Not in Use" or similar text values
+                 if (isNaN(validTo.charAt(0)) || validTo.toLowerCase().includes('not in use')) {
+                     return;
+                 }
+                 
+                 try {
+                     // Handle DD/MM/YYYY format
+                     let validToDate = null;
+                     
+                     if (validTo.includes('/')) {
+                         const parts = validTo.split('/');
+                         if (parts.length === 3) {
+                             const day = parseInt(parts[0], 10);
+                             const month = parseInt(parts[1], 10);
+                             const year = parseInt(parts[2], 10);
+                             
+                             if (!isNaN(day) && !isNaN(month) && !isNaN(year) && 
+                                 day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+                                 validToDate = new Date(year, month - 1, day);
+                                 validToDate.setHours(0, 0, 0, 0);
+                             }
+                         }
+                     }
+                     // Handle Excel serial date numbers (if Excel converted dates)
+                     else if (!isNaN(validTo) && validTo.length > 4) {
+                         const excelDate = parseFloat(validTo);
+                         if (excelDate > 40000 && excelDate < 60000) {
+                             validToDate = new Date((excelDate - 25569) * 86400 * 1000);
+                             validToDate.setHours(0, 0, 0, 0);
+                         }
+                     }
+                     
+                     if (validToDate && !isNaN(validToDate.getTime()) && validToDate < today) {
+                         expiredUsers++;
+                         if (index < 5) {
+                             console.log(`  -> EXPIRED (Date: ${validToDate.toLocaleDateString()})`);
+                         }
+                     }
+                 } catch (e) {
+                     console.log('Error parsing date:', validTo, e);
+                 }
+             });
+             
+             console.log('Expired Users:', expiredUsers);
+             
+             const expiredPercent = totalAccounts > 0 ? ((expiredUsers / totalAccounts) * 100).toFixed(1) : '0.0';
+
+             document.getElementById('sapTotalAccounts').textContent = totalAccounts;
+             document.getElementById('sapADialog').textContent = aDialogUsers;
+             document.getElementById('sapADialogPercent').textContent = `${aDialogPercent}% of total`;
+             document.getElementById('sapBSystem').textContent = bSystemUsers;
+             document.getElementById('sapBSystemPercent').textContent = `${bSystemPercent}% of total`;
+             document.getElementById('sapSService').textContent = sServiceUsers;
+             document.getElementById('sapSServicePercent').textContent = `${sServicePercent}% of total`;
+             document.getElementById('sapExpiredUsers').textContent = expiredUsers;
+             document.getElementById('sapExpiredPercent').textContent = `${expiredPercent}% of total`;
+
+             createSapUserChart(aDialogUsers, bSystemUsers, sServiceUsers, expiredUsers);
          }
-         renderCompanies(companiesToShow, isBSC, isRoles, isGeneralInfo);
+
+         // Helper function to count user types case-insensitively
+         function countUserType(users, type) {
+             return users.filter(u => {
+                 const userType = u['Ext6 - UserType'] || '';
+                 return userType.toLowerCase() === type.toLowerCase();
+             }).length;
          }
-         
-         // New function to handle search in General Info tab - IMPROVED VERSION
-         function renderFilteredGeneralInfo(searchTerm) {
-         const companyList = document.getElementById('companyList');
-         
-         // Define the General Info content with proper HTML structure
-         const generalInfoContent = [
-         {
-             section: "Quick Access Links",
-             type: "links",
-             html: `
+
+         function createUserTypeSummary(userTypeCount) {
+             const grid = document.getElementById('userTypeSummary');
+             grid.innerHTML = '';
+             
+             // Define the specific order you want
+             const displayOrder = ['FUL', 'FULL', 'SVC', 'FAC', 'KIO', 'EXT', 'ADM', 'Not Specified'];
+             
+             // Create items in the specified order
+             displayOrder.forEach(type => {
+                 const count = userTypeCount[type] || 0;
+                 if (count > 0) { // Only show if there are users of this type
+                     const item = document.createElement('div');
+                     item.className = 'data-item';
+                     item.innerHTML = `
+                         <div class="data-item-label">${type}</div>
+                         <div class="data-item-value">${count}</div>
+                     `;
+                     grid.appendChild(item);
+                 }
+             });
+             
+             // If there are any other user types not in the specified order, add them at the end
+             Object.entries(userTypeCount).forEach(([type, count]) => {
+                 if (!displayOrder.includes(type) && count > 0) {
+                     const item = document.createElement('div');
+                     item.className = 'data-item';
+                     item.innerHTML = `
+                         <div class="data-item-label">${type}</div>
+                         <div class="data-item-value">${count}</div>
+                     `;
+                     grid.appendChild(item);
+                 }
+             });
+         }
+
+         function createStatusChart(active, inactive, kio, ext, ful) {
+             const ctx = document.getElementById('statusChart').getContext('2d');
+             if (window.statusChartInstance) {
+                 window.statusChartInstance.destroy();
+             }
+             window.statusChartInstance = new Chart(ctx, {
+                 type: 'doughnut',
+                 data: {
+                     labels: ['Active', 'Inactive', 'KIO Users', 'External Users', 'Full Users'],
+                     datasets: [{
+                         data: [active, inactive, kio, ext, ful],
+                         backgroundColor: ['#10b981', '#ef4444', '#8b5cf6', '#f59e0b', '#14b8a6'],
+                         borderWidth: 2,
+                         borderColor: '#fff'
+                     }]
+                 },
+                 options: {
+                     responsive: true,
+                     plugins: {
+                         legend: {
+                             position: 'bottom'
+                         }
+                     }
+                 }
+             });
+         }
+
+         function createSapUserChart(aDialog, bSystem, sService, expired) {
+             const ctx = document.getElementById('sapUserChart').getContext('2d');
+             if (window.sapUserChartInstance) {
+                 window.sapUserChartInstance.destroy();
+             }
+             
+             window.sapUserChartInstance = new Chart(ctx, {
+                 type: 'bar',
+                 data: {
+                     labels: ['A Dialog', 'B System', 'S Service', 'Expired Users'],
+                     datasets: [{
+                         label: 'Count',
+                         data: [aDialog, bSystem, sService, expired],
+                         backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6', '#ef4444'],
+                         borderWidth: 0
+                     }]
+                 },
+                 options: {
+                     responsive: true,
+                     maintainAspectRatio: false,
+                     plugins: {
+                         legend: {
+                             display: false
+                         }
+                     },
+                     scales: {
+                         y: {
+                             beginAtZero: true,
+                             ticks: {
+                                 stepSize: 1500, // Changed from 1000 to 1500
+                                 callback: function(value) {
+                                     return value.toLocaleString();
+                                 }
+                             },
+                             title: {
+                                 display: true,
+                                 text: 'Count'
+                             }
+                         }
+                     }
+                 }
+             });
+         }
+
+         function showSection(sectionId) {
+             document.querySelectorAll('.section').forEach(section => {
+                 section.classList.remove('active');
+             });
+             
+             document.querySelectorAll('.nav-tabs button').forEach(button => {
+                 button.classList.remove('active');
+                 // Only activate if button is visible
+                 if (button.style.display !== 'none') {
+                     if (button.getAttribute('onclick') === `showSection('${sectionId}')`) {
+                         button.classList.add('active');
+                     }
+                 }
+             });
+             
+             document.getElementById(sectionId).classList.add('active');
+         }
+
+         // Function to show SAP Compliance Full Page
+         function showSAPFullPage() {
+             document.getElementById('information-hub').style.display = 'none';
+             document.getElementById('sap-full-page').classList.add('active');
+         }
+
+         // Function to show Information Hub
+       // Function to show Information Hub and set active tab to All Companies
+function showInformationHub() {
+    document.getElementById('sap-full-page').classList.remove('active');
+    document.getElementById('information-hub').style.display = 'block';
+    
+    // Set All Companies tab as active
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.filter === 'all') {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Update search placeholder to All Companies style
+    document.getElementById('searchInput').placeholder = '🔍 Search by company name, code, country, or city...';
+    
+    // Clear search and render All Companies
+    document.getElementById('searchInput').value = '';
+    const clearSearchBtn = document.getElementById('clearSearch');
+    if (clearSearchBtn) {
+        clearSearchBtn.style.display = 'none';
+    }
+    
+    // Render All Companies
+    renderCompanies(allCompanies, false, false);
+}
+
+         // Function to render companies
+         function renderCompanies(companies, isBSC = false, isRoles = false, isGeneralInfo = false) {
+             const companyList = document.getElementById('companyList');
+             const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+             
+             // Handle General Info tab
+             if (activeFilter === 'general-info') {
+                 companyList.innerHTML = `
                  <div class="info-section">
-                     <h3>🔗 Quick Access Links</h3>
-                     <div class="company-details">
-                         <div class="detail-item">
-                             <div class="detail-value">
-                                 <a href="https://wbag.sharepoint.com/sites/intra-collab-dataroom-Saviynt_Informations_Hub" target="_blank">ℹ️ Compliance Information Hub</a>
-                             </div>
-                         </div>
-                         <div class="detail-item">
-                             <div class="detail-value">
-                                 <a href="https://ssm-wienerberger.saviyntcloud.com/ECMv6/request/requestHome" target="_blank">🔐 Saviynt</a>
-                             </div>
-                         </div>
-                         <div class="detail-item">
-                             <div class="detail-value">
-                                 <a href="https://wbprod01.service-now.com/now/nav/ui/classic/params/target/%2Ftask_list.do%3Fsysparm_userpref_module%3D2ccb50dfc61122820032728dcea648fe%26sysparm_query%3Dactive%3Dtrue%5Eassignment_groupDYNAMICd6435e965f510100a9ad2572f2b47744%5Eassigned_toISEMPTY%5EEQ%26sysparm_clear_stack%3Dtrue" target="_blank">🛠️ ITSM</a>
-                             </div>
-                         </div>
-                         <div class="detail-item">
-                             <div class="detail-value">
-                                 <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B9ECABE72-442E-42CE-859D-A781AFF573A0%7D&file=Saviynt%20Key%20Users.xlsx&action=default&mobileredirect=true" target="_blank">👥 Saviynt Key Users</a>
-                             </div>
-                         </div>
-                         <div class="detail-item">
-                             <div class="detail-value">
-                                 <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B8E269E0C-581A-4EA2-A96A-CB3808F2DDFB%7D&file=SAP%20S4%20Transactions%20per%20Role%20in%20SAP%20Production%20System.xlsx&action=default&mobileredirect=true" target="_blank">⚙️ Role and Transaction</a>
-                             </div>
-                         </div>
-                         <div class="detail-item">
-                             <div class="detail-value">
-                                 <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B20E8C0C1-53A5-4183-93D9-1D68DE59E00A%7D&file=zzunlock%20Key-User%20List.xlsx&action=default&mobileredirect=true" target="_blank">🔓 Users With ZZUNLOCK</a>
-                             </div>
-                         </div>
-                     </div>
+                 <h3>🔗 Quick Access Links</h3>
+                 <div class="company-details">
+                 <div class="detail-item">
+                    <div class="detail-value">
+                        <a href="https://wbag.sharepoint.com/sites/intra-collab-dataroom-Saviynt_Informations_Hub" target="_blank">ℹ️ SAP Compliance Info Hub</a>
+                    </div>
                  </div>
-             `,
-             searchableText: "Quick Access Links Compliance Information Hub Saviynt ITSM Saviynt Key Users Role and Transaction Users With ZZUNLOCK"
-         },
-         {
-             section: "Approval Requirements for Critical Roles and Profiles",
-             type: "approval",
-             html: `
+                 <div class="detail-item">
+                    <div class="detail-value">
+                        <a href="https://ssm-wienerberger.saviyntcloud.com/ECMv6/request/requestHome" target="_blank">🔐 Saviynt</a>
+                    </div>
+                 </div>
+                 <div class="detail-item">
+                    <div class="detail-value">
+                        <a href="https://wbprod01.service-now.com/now/nav/ui/classic/params/target/%2Ftask_list.do%3Fsysparm_userpref_module%3D2ccb50dfc61122820032728dcea648fe%26sysparm_query%3Dactive%3Dtrue%5Eassignment_groupDYNAMICd6435e965f510100a9ad2572f2b47744%5Eassigned_toISEMPTY%5EEQ%26sysparm_clear_stack%3Dtrue" target="_blank">🛠️ ITSM</a>
+                    </div>
+                 </div>
+                 <div class="detail-item">
+                    <div class="detail-value">
+                        <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B9ECABE72-442E-42CE-859D-A781AFF573A0%7D&file=Saviynt%20Key%20Users.xlsx&action=default&mobileredirect=true" target="_blank">👥 Saviynt Key Users</a>
+                    </div>
+                 </div>
+                 <div class="detail-item">
+                    <div class="detail-value">
+                        <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B8E269E0C-581A-4EA2-A96A-CB3808F2DDFB%7D&file=SAP%20S4%20Transactions%20per%20Role%20in%20SAP%20Production%20System.xlsx&action=default&mobileredirect=true" target="_blank">⚙️ Role and Transaction</a>
+                    </div>
+                 </div>
+                 <div class="detail-item">
+                    <div class="detail-value">
+                        <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B20E8C0C1-53A5-4183-93D9-1D68DE59E00A%7D&file=zzunlock%20Key-User%20List.xlsx&action=default&mobileredirect=true" target="_blank">🔓 Users With ZZUNLOCK</a>
+                    </div>
+                 </div>
+                 <div class="detail-item">
+                    <div class="detail-value">
+                        <a href="https://portal.einstein.local/corp/gcdb/SitePages/Home.aspx" target="_blank" style=" font-weight: bold;">🌍 GCDB</a>
+                    </div>
+                 </div>
+                 <div class="detail-item">
+                 <div class="detail-value">
+                 <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8em;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <strong style="color: #1e3c72; font-size: 0.95em; min-width: 40px;">🌩️ C4C</strong>
+                        <a href="https://my357901-sso.crm.ondemand.com/sap/ap/ui/repository/SAP_UI/HTML5/newclient.html?app.component=/SAP_UI_CT/Main/root.uiccwoc&rootWindow=X&redirectUrl=/sap/byd/runtime&sap-ui-language=en_us#Nav/0/eyJfc1dvY0lkIjpudWxsLCJfc1ZpZXdJZCI6bnVsbCwiX3NQZXJmb3JtYW5jZVdvY0lkIjoiSG9tZSIsIl9zUGVyZm9ybWFuY2VWaWV3SWQiOiJIb21lIiwiX3NDb250ZXh0SWQiOiJhNjc2MjIwODRmN2Y3OGUzYTU3MmE1YTYzNTBkMjk3OCJ9" target="_blank" style="padding: 3px 6px; background: #e8f5e8; border-radius: 3px; text-align: center; font-size: 0.75em; text-decoration: none; color: #333;">🟢 PROD</a>
+                        <a href="https://my349256-sso.crm.ondemand.com/sap/ap/ui/repository/SAP_UI/HTML5/newclient.html?app.component=/SAP_UI_CT/Main/root.uiccwoc&rootWindow=X&redirectUrl=/sap/byd/runtime&sap-ui-language=en_us#Nav/0/eyJfc1dvY0lkIjpudWxsLCJfc1ZpZXdJZCI6bnVsbCwiX3NQZXJmb3JmYW5jZVdvY0lkIjoiSG9tZSIsIl9zUGVyZm9ybWFuY2VWaWV3SWQiOiJIb21lIiwiX3NDb250ZXh0SWQiOiI1ZDIxZmRelNTRjYzZjN2RhMTU4MjI1ZWNiODIxMjRhYiJ9" target="_blank" style="padding: 3px 6px; background: #fff3cd; border-radius: 3px; text-align: center; font-size: 0.75em; text-decoration: none; color: #333;">🟡 TEST</a>
+                        <a href="https://my358108-sso.crm.ondemand.com/sap/ap/ui/repository/SAP_UI/HTML5/newclient.html?app.component=/SAP_UI_CT/Main/root.uiccwoc&rootWindow=X&redirectUrl=/sap/byd/runtime&sap-ui-language=en_us#Nav/0/eyJfc1dvY0lkIjpudWxsLCJfc1ZpZXdJZCI6bnVsbCwiX3NQZXJmb3JtYW5jZVdvY0lkIjoiSG9tZSIsIl9zUGVyZm9ybWFuY2VWaWV3SWQiOiJIb21lIiwiX3NDb250ZXh0SWQiOiI5ZDYyZDUwYmY0M2YxNjk2ZWQzMzFmYmJmMDU0ZGZkNCJ9" target="_blank" style="padding: 3px 6px; background: #e7f3ff; border-radius: 3px; text-align: center; font-size: 0.75em; text-decoration: none; color: #333;">🔵 DEV</a>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <strong style="color: #1e3c72; font-size: 0.95em; min-width: 40px;">📈 SAC</strong>
+                        <a href="https://wienerberger-1.eu10.hcs.cloud.sap/sap/fpa/ui/app.html#/home" target="_blank" style="padding: 3px 6px; background: #e8f5e8; border-radius: 3px; text-align: center; font-size: 0.75em; text-decoration: none; color: #333;">🟢 PROD</a>
+                        <a href="https://wienerberger-q.eu10.hcs.cloud.sap/sap/fpa/ui/app.html#/home&/h/catalog/?filter=1BA003879DEF08AF25FB06BBF9DA35F1,2BA003879DEF1C54CFE3C8E0ECF8445B,DA0020849ECE51AE3D4E3E03DA74CDAE&sort=recently-published&filterpanelopen=true" target="_blank" style="padding: 3px 6px; background: #fff3cd; border-radius: 3px; text-align: center; font-size: 0.75em; text-decoration: none; color: #333;">🟡 TEST</a>
+                    </div>
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                 </div>
+                     </div>
+                 
                  <div class="info-section">
                      <h3>⚠️ Approval Requirements for Critical Roles and Profiles</h3>
                      <div class="approval-info">
-                         <p><strong>Always obtain approval for SAP_ALL and all SAP_NEW authorizations</strong> for new or existing users in both WPR and WBP from:</p>
+                         <p><strong>Always obtain approval for SAP_ALL and all SAP_NEW authorisations</strong> for new or existing users in both WPR and WBP from:</p>
                          <ul>
                              <li><strong>WBP:</strong> Thomas Landl</li>
                              <li><strong>WPR:</strong> Ernst Tschach</li>
@@ -42230,13 +43123,7 @@
                          </div>
                      </div>
                  </div>
-             `,
-             searchableText: "Approval Requirements for Critical Roles and Profiles Always obtain approval for SAP_ALL and all SAP_NEW authorizations for new or existing users in both WPR and WBP from WBP Thomas Landl WPR Ernst Tschach CIT roles are always critical to assign Important CIT roles"
-         },
-         {
-             section: "Contact Persons for SAP Systems",
-             type: "contacts",
-             html: `
+                 
                  <div class="info-section">
                      <h3>📞 Contact Persons for SAP Systems</h3>
                      <div class="contact-table-container">
@@ -42272,165 +43159,604 @@
                          </table>
                      </div>
                  </div>
-             `,
-             searchableText: "Contact Persons for SAP Systems WPR Ernst Tschach WBP WCP Thomas Landl MM SD Gabor Tisler Warehouse Management MM MII Janusz Gren ISO Marlin Vendor Melinda Hazi C4C SAC"
-         },
-         {
-             section: "About This Document",
-             type: "about",
-             html: `
+                 
                  <div class="info-section">
-                     <h3>ℹ️ About This Document</h3>
-                     <div class="about-info">
-                         <p>This document was prepared by Samundra to facilitate quicker and easier access to essential information. It provides comprehensive organisational data, including BSC (Business Service Center) information, across multiple countries within the Wienerberger Group. Use the search and filter functions above to find specific companies, BSC status details, or SAP roles and authorisations. All data and access links are sourced exclusively from the official Excel file.</p>
-                     </div>
+                 <h3>ℹ️ About This Document</h3>
+                 <div class="about-info">
+                 <p>This document was prepared by Samundra to facilitate quicker and easier access to essential information. It provides comprehensive organisational data, including BSC (Business Service Center) information, across multiple countries within the Wienerberger Group. Use the search and filter functions above to find specific companies, BSC status details, or SAP roles and authorisations. All data and access links are sourced exclusively from the official Excel file.</p>
                  </div>
-             `,
-             searchableText: "About This Document This document was prepared by Samundra to facilitate quicker and easier access to essential information It provides comprehensive organisational data including BSC Business Service Center information across multiple countries within the Wienerberger Group Use the search and filter functions above to find specific companies BSC status details or SAP roles and authorisations All data and access links are sourced exclusively from the official Excel file"
+                 </div>
+                 `;
+                 updateStats([], false, false, true);
+                 return;
+             }
+             
+             if (isRoles) {
+                 if (companies.length === 0) {
+                     console.log("No roles to display");
+                     companyList.innerHTML = `
+                         <div class="no-results">
+                             <h3>No roles found</h3>
+                             <p>Try adjusting your search or filter criteria</p>
+                         </div>
+                     `;
+                     return;
+                 }
+                 console.log("Rendering roles:", companies.map(r => r.motherRole));
+                 companyList.innerHTML = companies.map(role => {
+                     const sodBadgeClass = role.sodApproval && role.sodApproval.toLowerCase() === 'yes' ? 'sod-yes' : 'sod-no';
+                     const sodBadgeText = role.sodApproval && role.sodApproval.toLowerCase() === 'yes' ? 'SOD Approval Required' : 'No SOD Approval';
+                     
+                     return `
+                         <div class="role-card">
+                             <div class="role-header">
+                                 <div class="role-title">
+                                     <h2>${role.motherRole}</h2>
+                                     <div class="role-description">${role.description}</div>
+                                 </div>
+                                 <div class="role-badges">
+                                     <div class="sod-badge ${sodBadgeClass}">${sodBadgeText}</div>
+                                 </div>
+                             </div>
+                             
+                             <div class="company-details">
+                                 ${role.additionalRoles ? `
+                                 <div class="detail-item highlight">
+                                     <div class="detail-label">Additional Roles</div>
+                                     <div class="detail-value">${role.additionalRoles}</div>
+                                 </div>
+                                 ` : ''}
+                                 
+                                 <div class="detail-item">
+                                     <div class="detail-label">SOD Approval</div>
+                                     <div class="detail-value">${role.sodApproval || 'No'}</div>
+                                 </div>
+                             </div>
+                             
+                             ${role.transactions.length > 0 ? `
+                             <div class="transactions">
+                                 <div class="transactions-title">Transactions (${role.transactions.length})</div>
+                                 <div class="transaction-list">
+                                     ${role.transactions.map(transaction => `
+                                         <div class="transaction-item">
+                                             <div>
+                                                 <span class="transaction-code">${transaction.code}</span>
+                                                 <div class="transaction-description">${transaction.description}</div>
+                                             </div>
+                                         </div>
+                                     `).join('')}
+                                 </div>
+                             </div>
+                             ` : ''}
+                         </div>
+                     `;
+                 }).join('');
+             }
+             else if (isBSC) {
+                 if (companies.length === 0) {
+                     console.log("No BSC companies to display");
+                     companyList.innerHTML = `
+                         <div class="no-results">
+                             <h3>No BSC companies found</h3>
+                             <p>Try adjusting your search or filter criteria</p>
+                         </div>
+                     `;
+                     return;
+                 }
+                 companyList.innerHTML = companies.map(company => {
+                     const bscClass = getBSCClass(company.bscStatus);
+                     const bscBadge = getBSCBadge(company.bscStatus);
+                     
+                     return `
+                         <div class="company-card ${bscClass}">
+                             <div class="company-header">
+                                 <div class="company-title">
+                                     <h2>${company.name}</h2>
+                                     <div class="company-details">
+                                         <div class="detail-item">
+                                             <div class="detail-label">Country</div>
+                                             <div class="detail-value">${company.country}</div>
+                                         </div>
+                                         ${company.cfd ? `
+                                         <div class="detail-item">
+                                             <div class="detail-label">CFD</div>
+                                             <div class="detail-value">${company.cfd}</div>
+                                         </div>
+                                         ` : ''}
+                                     </div>
+                                 </div>
+                                 <div class="company-badges">
+                                     <div class="company-code">${company.code}</div>
+                                     ${bscBadge}
+                                 </div>
+                             </div>
+                             
+                             ${company.notes ? `
+                             <div class="detail-item highlight">
+                                 <div class="detail-label">Notes</div>
+                                 <div class="detail-value">${company.notes}</div>
+                             </div>
+                             ` : ''}
+                             
+                             ${company.subsidiaries && company.subsidiaries.length > 0 ? `
+                             <div class="subsidiaries">
+                                 <div class="subsidiaries-title">Subsidiaries & Associated Companies</div>
+                                 <div class="subsidiary-list">
+                                     ${company.subsidiaries.map(subsidiary => `
+                                         <div class="subsidiary-item">
+                                             <strong>${subsidiary.code || 'N/A'}</strong> - ${subsidiary.name}
+                                         </div>
+                                     `).join('')}
+                                 </div>
+                             </div>
+                             ` : ''}
+                         </div>
+                     `;
+                 }).join('');
+             } else {
+                 if (companies.length === 0) {
+                     console.log("No companies to display");
+                     companyList.innerHTML = `
+                         <div class="no-results">
+                             <h3>No companies found</h3>
+                             <p>Try adjusting your search or filter criteria</p>
+                         </div>
+                     `;
+                     return;
+                 }
+                 companyList.innerHTML = companies.map(company => {
+                     const userGroup = userGroups[company.code] || 'N/A';
+                     return `
+                         <div class="company-card">
+                             <div class="company-header">
+                                 <div class="company-title">
+                                     <h2>${company.name}</h2>
+                                     <div class="company-details">
+                                         <div class="detail-item">
+                                             <div class="detail-label">Country</div>
+                                             <div class="detail-value">${company.country}</div>
+                                         </div>
+                                         <div class="detail-item">
+                                             <div class="detail-label">City</div>
+                                             <div class="detail-value">${company.city || 'N/A'}</div>
+                                         </div>
+                                     </div>
+                                 </div>
+                                 <div class="company-badges">
+                                     <div class="company-code">${company.code}</div>
+                                     <div class="user-group">${userGroup}</div>
+                                 </div>
+                             </div>
+                         </div>
+                     `;
+                 }).join('');
+             }
+             
+             // Update stats
+             updateStats(companies, isBSC, isRoles);
          }
-         ];
          
-         // Filter content based on search term
-         const filteredContent = generalInfoContent.filter(section => {
-         return section.searchableText.toLowerCase().includes(searchTerm);
-         });
-         
-         if (filteredContent.length === 0) {
-         companyList.innerHTML = `
-             <div class="no-results">
-                 <h3>No matching information found</h3>
-                 <p>Try adjusting your search or filter criteria</p>
-             </div>
-         `;
-         return;
+         // Helper function to get BSC status class
+         function getBSCClass(bscStatus) {
+             if (!bscStatus) return '';
+             if (bscStatus.toLowerCase().includes('live')) return 'bsc-live';
+             if (bscStatus.toLowerCase().includes('forming')) return 'bsc-forming';
+             if (bscStatus.toLowerCase().includes('partial')) return 'general-info';
+             return '';
          }
          
-         // Render filtered content using the original HTML
-         let html = filteredContent.map(section => section.html).join('');
-         companyList.innerHTML = html;
+         // Helper function to get BSC badge HTML
+         function getBSCBadge(bscStatus) {
+             if (!bscStatus) return '';
+             let badgeClass = '';
+             if (bscStatus.toLowerCase().includes('live')) badgeClass = 'bsc-live-badge';
+             else if (bscStatus.toLowerCase().includes('forming')) badgeClass = 'bsc-forming-badge';
+             else if (bscStatus.toLowerCase().includes('partial')) badgeClass = 'general-info-badge';
+             
+             return badgeClass ? `<div class="bsc-badge ${badgeClass}">${bscStatus}</div>` : '';
+         }
          
-         // Apply search highlighting without breaking HTML structure
-         applySafeHighlighting(searchTerm);
+         // Update the updateStats function to handle search in General Info
+         function updateStats(companies, isBSC, isRoles, isGeneralInfo = false, searchTerm = '') {
+             const companyCount = document.getElementById('companyCount');
+             const bscStats = document.getElementById('bscStats');
+             
+             if (isGeneralInfo) {
+                 if (searchTerm) {
+                     companyCount.textContent = `General Information - Search: "${searchTerm}"`;
+                 } else {
+                     companyCount.textContent = `General Information`;
+                 }
+                 bscStats.textContent = `Wienerberger AG`;
+             } else if (isRoles) {
+                 companyCount.textContent = `Showing ${companies.length} roles`;
+                 bscStats.textContent = `Roles: ${rolesData.length}`;
+             } else if (isBSC) {
+                 companyCount.textContent = `Showing ${companies.length} companies`;
+                 const liveCount = companies.filter(c => c.bscStatus && c.bscStatus.toLowerCase().includes('live')).length;
+                 const partialCount = companies.filter(c => c.bscStatus && c.bscStatus.toLowerCase().includes('partial')).length;
+                 bscStats.textContent = `BSC Live: ${liveCount} | BSC Partial: ${partialCount}`;
+             } else {
+                 companyCount.textContent = `Showing ${companies.length} companies`;
+                 const europeCount = companies.filter(c => 
+                     ['NL', 'BE', 'DE', 'FR', 'AT', 'LU', 'CH', 'IT', 'NO', 'SE', 'DK', 'FI', 'GB', 'IE', 'EE', 'HU', 'CZ', 'SK', 'PL', 'HR', 'RO', 'BA', 'BG', 'RS', 'MK', 'SI'].includes(c.country)
+                 ).length;
+                 const northAmericaCount = companies.filter(c => 
+                     ['US', 'CA'].includes(c.country)
+                 ).length;
+                 const otherCount = companies.length - europeCount - northAmericaCount;
+                 bscStats.textContent = `Europe: ${europeCount} | North America: ${northAmericaCount} | Other: ${otherCount}`;
+             }
+         }
          
-         // Update stats for General Info with search
-         updateStats([], false, false, true, searchTerm);
+         // Filter and search functionality
+         function filterCompanies() {
+             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+             const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+             
+             console.log("Search term:", searchTerm);
+             console.log("Active filter:", activeFilter);
+             
+             let companiesToShow = [];
+             let isBSC = false;
+             let isRoles = false;
+             let isGeneralInfo = false;
+             
+             if (activeFilter === 'all') {
+                 companiesToShow = allCompanies;
+                 isBSC = false;
+                 isRoles = false;
+                 isGeneralInfo = false;
+             } else if (activeFilter === 'roles') {
+                 companiesToShow = rolesData;
+                 isBSC = false;
+                 isRoles = true;
+                 isGeneralInfo = false;
+                 console.log("Roles data loaded:", rolesData.length, "roles");
+             } else if (activeFilter === 'bsc-live') {
+                 companiesToShow = bscCompanies.filter(company => 
+                     company.bscStatus && company.bscStatus.toLowerCase().includes('live')
+                 );
+                 isBSC = true;
+                 isRoles = false;
+                 isGeneralInfo = false;
+             } else if (activeFilter === 'general-info') {
+                 // For General Info tab, we'll handle search differently
+                 isBSC = false;
+                 isRoles = false;
+                 isGeneralInfo = true;
+                 
+                 // If there's a search term, we need to filter the General Info content
+                 if (searchTerm) {
+                     // Create a filtered version of General Info content based on search
+                     renderFilteredGeneralInfo(searchTerm);
+                     return;
+                 } else {
+                     // No search term, show normal General Info
+                     renderCompanies([], false, false, true);
+                     return;
+                 }
+             }
+             
+             // Apply search filter for other tabs
+             if (searchTerm) {
+                 console.log("Applying search filter for term:", searchTerm);
+                 
+                 if (isRoles) {
+                     console.log("Searching in roles...");
+                     companiesToShow = companiesToShow.filter(role => {
+                         const roleMatches = 
+                             role.motherRole.toLowerCase().includes(searchTerm) ||
+                             role.description.toLowerCase().includes(searchTerm) ||
+                             (role.sodApproval && role.sodApproval.toLowerCase().includes(searchTerm)) ||
+                             (role.additionalRoles && role.additionalRoles.toLowerCase().includes(searchTerm));
+                         
+                         const transactionMatches = role.transactions.some(transaction => 
+                             transaction.code.toLowerCase().includes(searchTerm) ||
+                             transaction.description.toLowerCase().includes(searchTerm)
+                         );
+                         
+                         const matches = roleMatches || transactionMatches;
+                         
+                         if (matches) {
+                             console.log("Found matching role:", role.motherRole);
+                         }
+                         
+                         return matches;
+                     });
+                     console.log("Roles after search:", companiesToShow.length);
+                 } else if (isBSC) {
+                     companiesToShow = companiesToShow.filter(company => 
+                         company.name.toLowerCase().includes(searchTerm) ||
+                         company.code.toLowerCase().includes(searchTerm) ||
+                         company.country.toLowerCase().includes(searchTerm) ||
+                         (company.cfd && company.cfd.toLowerCase().includes(searchTerm)) ||
+                         (company.bscStatus && company.bscStatus.toLowerCase().includes(searchTerm)) ||
+                         (company.subsidiaries && company.subsidiaries.some(subsidiary => 
+                             subsidiary.name.toLowerCase().includes(searchTerm) ||
+                             (subsidiary.code && subsidiary.code.toLowerCase().includes(searchTerm))
+                         ))
+                     );
+                 } else {
+                     companiesToShow = companiesToShow.filter(company => 
+                         company.name.toLowerCase().includes(searchTerm) ||
+                         company.code.toLowerCase().includes(searchTerm) ||
+                         company.city.toLowerCase().includes(searchTerm) ||
+                         company.country.toLowerCase().includes(searchTerm) ||
+                         (userGroups[company.code] && userGroups[company.code].toLowerCase().includes(searchTerm))
+                     );
+                 }
+             }
+             renderCompanies(companiesToShow, isBSC, isRoles, isGeneralInfo);
+         }
+         
+         // New function to handle search in General Info tab - IMPROVED VERSION
+         function renderFilteredGeneralInfo(searchTerm) {
+             const companyList = document.getElementById('companyList');
+             
+             // Define the General Info content with proper HTML structure
+             const generalInfoContent = [
+                 {
+                     section: "Quick Access Links",
+                     type: "links",
+                     html: `
+                         <div class="info-section">
+                             <h3>🔗 Quick Access Links</h3>
+                             <div class="company-details">
+                                 <div class="detail-item">
+                                     <div class="detail-value">
+                                         <a href="https://wbag.sharepoint.com/sites/intra-collab-dataroom-Saviynt_Informations_Hub" target="_blank">ℹ️ Compliance Information Hub</a>
+                                     </div>
+                                 </div>
+                                 <div class="detail-item">
+                                     <div class="detail-value">
+                                         <a href="https://ssm-wienerberger.saviyntcloud.com/ECMv6/request/requestHome" target="_blank">🔐 Saviynt</a>
+                                     </div>
+                                 </div>
+                                 <div class="detail-item">
+                                     <div class="detail-value">
+                                         <a href="https://wbprod01.service-now.com/now/nav/ui/classic/params/target/%2Ftask_list.do%3Fsysparm_userpref_module%3D2ccb50dfc61122820032728dcea648fe%26sysparm_query%3Dactive%3Dtrue%5Eassignment_groupDYNAMICd6435e965f510100a9ad2572f2b47744%5Eassigned_toISEMPTY%5EEQ%26sysparm_clear_stack%3Dtrue" target="_blank">🛠️ ITSM</a>
+                                     </div>
+                                 </div>
+                                 <div class="detail-item">
+                                     <div class="detail-value">
+                                         <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B9ECABE72-442E-42CE-859D-A781AFF573A0%7D&file=Saviynt%20Key%20Users.xlsx&action=default&mobileredirect=true" target="_blank">👥 Saviynt Key Users</a>
+                                     </div>
+                                 </div>
+                                 <div class="detail-item">
+                                     <div class="detail-value">
+                                         <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B8E269E0C-581A-4EA2-A96A-CB3808F2DDFB%7D&file=SAP%20S4%20Transactions%20per%20Role%20in%20SAP%20Production%20System.xlsx&action=default&mobileredirect=true" target="_blank">⚙️ Role and Transaction</a>
+                                     </div>
+                                 </div>
+                                 <div class="detail-item">
+                                     <div class="detail-value">
+                                         <a href="https://wbag.sharepoint.com/:x:/r/sites/intra-collab-dataroom-Saviynt_Informations_Hub/_layouts/15/Doc.aspx?sourcedoc=%7B20E8C0C1-53A5-4183-93D9-1D68DE59E00A%7D&file=zzunlock%20Key-User%20List.xlsx&action=default&mobileredirect=true" target="_blank">🔓 Users With ZZUNLOCK</a>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     `,
+                     searchableText: "Quick Access Links Compliance Information Hub Saviynt ITSM Saviynt Key Users Role and Transaction Users With ZZUNLOCK"
+                 },
+                 {
+                     section: "Approval Requirements for Critical Roles and Profiles",
+                     type: "approval",
+                     html: `
+                         <div class="info-section">
+                             <h3>⚠️ Approval Requirements for Critical Roles and Profiles</h3>
+                             <div class="approval-info">
+                                 <p><strong>Always obtain approval for SAP_ALL and all SAP_NEW authorizations</strong> for new or existing users in both WPR and WBP from:</p>
+                                 <ul>
+                                     <li><strong>WBP:</strong> Thomas Landl</li>
+                                     <li><strong>WPR:</strong> Ernst Tschach</li>
+                                 </ul>
+                                 <div class="critical-note">
+                                     <strong>⚠️ Important:</strong> CIT roles are always critical to assign. Please confirm before assigning CIT roles.
+                                 </div>
+                             </div>
+                         </div>
+                     `,
+                     searchableText: "Approval Requirements for Critical Roles and Profiles Always obtain approval for SAP_ALL and all SAP_NEW authorizations for new or existing users in both WPR and WBP from WBP Thomas Landl WPR Ernst Tschach CIT roles are always critical to assign Important CIT roles"
+                 },
+                 {
+                     section: "Contact Persons for SAP Systems",
+                     type: "contacts",
+                     html: `
+                         <div class="info-section">
+                             <h3>📞 Contact Persons for SAP Systems</h3>
+                             <div class="contact-table-container">
+                                 <table class="contact-table">
+                                     <thead>
+                                         <tr>
+                                             <th>SAP System / Modules</th>
+                                             <th>Contact Person</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody>
+                                         <tr>
+                                             <td><strong>WPR</strong></td>
+                                             <td>Ernst Tschach</td>
+                                         </tr>
+                                         <tr>
+                                             <td><strong>WBP, WCP</strong></td>
+                                             <td>Thomas Landl</td>
+                                         </tr>
+                                         <tr>
+                                             <td><strong>MM, SD</strong></td>
+                                             <td>Gabor Tisler</td>
+                                         </tr>
+                                         <tr>
+                                             <td><strong>Warehouse Management (MM, MII)</strong></td>
+                                             <td>Janusz Gren</td>
+                                         </tr>
+                                         <tr>
+                                             <td><strong>ISO/Marlin Vendor</strong></td>
+                                             <td>Melinda Hazi</td>
+                                         </tr>
+                                     </tbody>
+                                 </table>
+                             </div>
+                         </div>
+                     `,
+                     searchableText: "Contact Persons for SAP Systems WPR Ernst Tschach WBP WCP Thomas Landl MM SD Gabor Tisler Warehouse Management MM MII Janusz Gren ISO Marlin Vendor Melinda Hazi C4C SAC"
+                 },
+                 {
+                     section: "About This Document",
+                     type: "about",
+                     html: `
+                         <div class="info-section">
+                             <h3>ℹ️ About This Document</h3>
+                             <div class="about-info">
+                                 <p>This document was prepared by Samundra to facilitate quicker and easier access to essential information. It provides comprehensive organisational data, including BSC (Business Service Center) information, across multiple countries within the Wienerberger Group. Use the search and filter functions above to find specific companies, BSC status details, or SAP roles and authorisations. All data and access links are sourced exclusively from the official Excel file.</p>
+                             </div>
+                         </div>
+                     `,
+                     searchableText: "About This Document This document was prepared by Samundra to facilitate quicker and easier access to essential information It provides comprehensive organisational data including BSC Business Service Center information across multiple countries within the Wienerberger Group Use the search and filter functions above to find specific companies BSC status details or SAP roles and authorisations All data and access links are sourced exclusively from the official Excel file"
+                 }
+             ];
+             
+             // Filter content based on search term
+             const filteredContent = generalInfoContent.filter(section => {
+                 return section.searchableText.toLowerCase().includes(searchTerm);
+             });
+             
+             if (filteredContent.length === 0) {
+                 companyList.innerHTML = `
+                     <div class="no-results">
+                         <h3>No matching information found</h3>
+                         <p>Try adjusting your search or filter criteria</p>
+                     </div>
+                 `;
+                 return;
+             }
+             
+             // Render filtered content using the original HTML
+             let html = filteredContent.map(section => section.html).join('');
+             companyList.innerHTML = html;
+             
+             // Apply search highlighting without breaking HTML structure
+             applySafeHighlighting(searchTerm);
+             
+             // Update stats for General Info with search
+             updateStats([], false, false, true, searchTerm);
          }
          
          // Safe highlighting function that preserves HTML structure
          function applySafeHighlighting(searchTerm) {
-         if (!searchTerm) return;
-         
-         const companyList = document.getElementById('companyList');
-         
-         // Create a temporary container to work with
-         const tempDiv = document.createElement('div');
-         tempDiv.innerHTML = companyList.innerHTML;
-         
-         // Function to highlight text in a node
-         function highlightNode(node, term) {
-         if (node.nodeType === Node.TEXT_NODE) {
-             const regex = new RegExp(`(${term})`, 'gi');
-             const newText = node.textContent.replace(regex, '<mark class="search-highlight">$1</mark>');
-             if (newText !== node.textContent) {
-                 const span = document.createElement('span');
-                 span.innerHTML = newText;
-                 node.parentNode.replaceChild(span, node);
+             if (!searchTerm) return;
+             
+             const companyList = document.getElementById('companyList');
+             
+             // Create a temporary container to work with
+             const tempDiv = document.createElement('div');
+             tempDiv.innerHTML = companyList.innerHTML;
+             
+             // Function to highlight text in a node
+             function highlightNode(node, term) {
+                 if (node.nodeType === Node.TEXT_NODE) {
+                     const regex = new RegExp(`(${term})`, 'gi');
+                     const newText = node.textContent.replace(regex, '<mark class="search-highlight">$1</mark>');
+                     if (newText !== node.textContent) {
+                         const span = document.createElement('span');
+                         span.innerHTML = newText;
+                         node.parentNode.replaceChild(span, node);
+                     }
+                 } else if (node.nodeType === Node.ELEMENT_NODE && 
+                            node.tagName !== 'SCRIPT' && 
+                            node.tagName !== 'STYLE' &&
+                            node.tagName !== 'MARK') {
+                     Array.from(node.childNodes).forEach(child => highlightNode(child, term));
+                 }
              }
-         } else if (node.nodeType === Node.ELEMENT_NODE && 
-                    node.tagName !== 'SCRIPT' && 
-                    node.tagName !== 'STYLE' &&
-                    node.tagName !== 'MARK') {
-             Array.from(node.childNodes).forEach(child => highlightNode(child, term));
-         }
+             
+             // Apply highlighting to all text nodes
+             Array.from(tempDiv.childNodes).forEach(child => highlightNode(child, searchTerm));
+             
+             // Update the content
+             companyList.innerHTML = tempDiv.innerHTML;
          }
          
-         // Apply highlighting to all text nodes
-         Array.from(tempDiv.childNodes).forEach(child => highlightNode(child, searchTerm));
-         
-         // Update the content
-         companyList.innerHTML = tempDiv.innerHTML;
-         }
          // Function to highlight search terms
          function highlightSearchTerm(searchTerm) {
-         if (!searchTerm) return;
-         
-         const companyList = document.getElementById('companyList');
-         const html = companyList.innerHTML;
-         
-         // Use a more careful replacement that preserves HTML tags
-         const regex = new RegExp(`(?![^<]*>)\\b(${searchTerm})\\b`, 'gi');
-         const highlightedHTML = html.replace(regex, '<mark class="search-highlight">$1</mark>');
-         
-         companyList.innerHTML = highlightedHTML;
+             if (!searchTerm) return;
+             
+             const companyList = document.getElementById('companyList');
+             const html = companyList.innerHTML;
+             
+             // Use a more careful replacement that preserves HTML tags
+             const regex = new RegExp(`(?![^<]*>)\\b(${searchTerm})\\b`, 'gi');
+             const highlightedHTML = html.replace(regex, '<mark class="search-highlight">$1</mark>');
+             
+             companyList.innerHTML = highlightedHTML;
          }
          
          // Event listeners
          document.addEventListener('DOMContentLoaded', function() {
-         // Initial render
-         renderCompanies(allCompanies, false, false);
-         
-         // Search input event
-         document.getElementById('searchInput').addEventListener('input', filterCompanies);
-         
-         // Filter button events
-         document.querySelectorAll('.filter-btn').forEach(button => {
-         button.addEventListener('click', function() {
-             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-             this.classList.add('active');
+             // Initial render
+             renderCompanies(allCompanies, false, false);
              
-             // Update search placeholder based on active filter
-             const searchInput = document.getElementById('searchInput');
-             const filter = this.dataset.filter;
+             // Search input event
+             document.getElementById('searchInput').addEventListener('input', filterCompanies);
              
-             if (filter === 'roles') {
-         searchInput.placeholder = '🔍 Search by role name, description, SOD status, or transaction...';
-         } else if (filter === 'all') {
-         searchInput.placeholder = '🔍 Search by company name, code, country, or city...';
-         } else if (filter === 'general-info') {
-         searchInput.placeholder = '🔍 Search by any information...';
-         } else {
-         searchInput.placeholder = '🔍 Search by company name, code, country, CFD, or BSC status...';
-         }
+             // Filter button events
+             document.querySelectorAll('.filter-btn').forEach(button => {
+                 button.addEventListener('click', function() {
+                     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                     this.classList.add('active');
+                     
+                     // Update search placeholder based on active filter
+                     const searchInput = document.getElementById('searchInput');
+                     const filter = this.dataset.filter;
+                     
+                     if (filter === 'roles') {
+                         searchInput.placeholder = '🔍 Search by role name, description, SOD status, or transaction...';
+                     } else if (filter === 'all') {
+                         searchInput.placeholder = '🔍 Search by company name, code, country, or city...';
+                     } else if (filter === 'general-info') {
+                         searchInput.placeholder = '🔍 Search by any information...';
+                     } else {
+                         searchInput.placeholder = '🔍 Search by company name, code, country, CFD, or BSC status...';
+                     }
+                     
+                     // Clear search and hide clear button when switching tabs
+                     searchInput.value = '';
+                     const clearSearchBtn = document.getElementById('clearSearch');
+                     if (clearSearchBtn) {
+                         clearSearchBtn.style.display = 'none';
+                     }
+                     
+                     filterCompanies();
+                 });
+             });
              
-             // Clear search and hide clear button when switching tabs
-             searchInput.value = '';
+             // Clear search button functionality
              const clearSearchBtn = document.getElementById('clearSearch');
-             if (clearSearchBtn) {
-                 clearSearchBtn.style.display = 'none';
-             }
+             const searchInput = document.getElementById('searchInput');
              
-             filterCompanies();
-         });
-         });
-         
-         // Clear search button functionality
-         const clearSearchBtn = document.getElementById('clearSearch');
-         const searchInput = document.getElementById('searchInput');
-         
-         if (clearSearchBtn && searchInput) {
-         // Show/hide clear button based on input content
-         searchInput.addEventListener('input', function() {
-             clearSearchBtn.style.display = this.value ? 'flex' : 'none';
-             filterCompanies();
-         });
-         
-         // Clear search when clear button is clicked
-         clearSearchBtn.addEventListener('click', function() {
-             searchInput.value = '';
-             clearSearchBtn.style.display = 'none';
-             filterCompanies();
-             searchInput.focus();
-         });
-         
-         // Also hide clear button when search is cleared by other means
-         searchInput.addEventListener('keydown', function(e) {
-             if (e.key === 'Escape') {
-                 searchInput.value = '';
-                 clearSearchBtn.style.display = 'none';
-                 filterCompanies();
+             if (clearSearchBtn && searchInput) {
+                 // Show/hide clear button based on input content
+                 searchInput.addEventListener('input', function() {
+                     clearSearchBtn.style.display = this.value ? 'flex' : 'none';
+                     filterCompanies();
+                 });
+                 
+                 // Clear search when clear button is clicked
+                 clearSearchBtn.addEventListener('click', function() {
+                     searchInput.value = '';
+                     clearSearchBtn.style.display = 'none';
+                     filterCompanies();
+                     searchInput.focus();
+                 });
+                 
+                 // Also hide clear button when search is cleared by other means
+                 searchInput.addEventListener('keydown', function(e) {
+                     if (e.key === 'Escape') {
+                         searchInput.value = '';
+                         clearSearchBtn.style.display = 'none';
+                         filterCompanies();
+                     }
+                 });
              }
-         });
-         }
          });
       </script>
    </body>
